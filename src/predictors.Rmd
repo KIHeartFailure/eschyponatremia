@@ -1,0 +1,71 @@
+```{r predadmission, cache=cacheon}
+
+ormod <- with(imp, glm(formula(paste0("d_hsSod_cat == '<135' ~ ", paste(modvars, collapse = " + "))),
+  family = binomial(link = "logit")
+))
+
+sormod <- summary(pool(ormod))
+
+nval <- length(sormod$term)
+outor <- data.frame(
+  var = as.character(sormod$term[2:nval]),
+  logor = sormod$estimate[2:nval],
+  lci = sormod$estimate[2:nval] - global_z05 * sormod$std.error[2:nval],
+  uci = sormod$estimate[2:nval] + global_z05 * sormod$std.error[2:nval],
+  p = fn(sormod$p.value[2:nval], dig = 3, p = TRUE)
+) %>%
+  mutate(orp = paste0(fn(exp(logor), 2), " (", fn(exp(lci), 2), "-", fn(exp(uci), 2), "), ", p)) %>%
+  # remove = Yes
+  mutate(Variable = str_replace(var, fixed("Yes"), "")) %>%
+  select(var, orp)
+
+colnames(outor) <- c("Variable", "Odds Ratio (95% CI)")
+
+write.xlsx(outor, paste0("./output/tabs/Predictors of hyponatremia at hospital admission_", Sys.Date(), ".xlsx"), rowNames = FALSE, overwrite = T)
+
+default_kable(outor,
+  font_size = 8,
+  caption = "Predictors of hyponatremia at hospital admission",
+  scale_down = F
+)
+```
+
+```{r preddischarge, cache=cacheon}
+
+impdata <- miceadds::subset_datlist(imp, subset = edata %>% filter(survpop) %>% pull(d_hsSod_cat) == "<135")
+
+ormod <- with(impdata, glm(formula(paste0("d_dcSod_cat == '>=135' ~ ", paste(modvars, collapse = " + "))),
+  family = binomial(link = "logit")
+))
+
+sormod <- summary(pool(ormod))
+
+nval <- length(sormod$term)
+outor <- data.frame(
+  var = as.character(sormod$term[2:nval]),
+  logor = sormod$estimate[2:nval],
+  lci = sormod$estimate[2:nval] - global_z05 * sormod$std.error[2:nval],
+  uci = sormod$estimate[2:nval] + global_z05 * sormod$std.error[2:nval],
+  p = fn(sormod$p.value[2:nval], dig = 3, p = TRUE)
+) %>%
+  mutate(orp = paste0(fn(exp(logor), 2), " (", fn(exp(lci), 2), "-", fn(exp(uci), 2), "), ", p)) %>%
+  # remove = Yes
+  mutate(Variable = str_replace(var, fixed("Yes"), "")) %>%
+  select(var, orp)
+
+colnames(outor) <- c("Variable", "Odds Ratio (95% CI)")
+
+write.xlsx(outor,
+  paste0(
+    "./output/tabs/Predictors of amelioration of hyponatremia_",
+    Sys.Date(), ".xlsx"
+  ),
+  rowNames = FALSE, overwrite = T
+)
+
+default_kable(outor,
+  font_size = 8,
+  caption = "Predictors of amelioration of hyponatremia during hospitalization",
+  scale_down = F
+)
+```

@@ -1,0 +1,84 @@
+```{r inhospoutcomesfunc, cache=cacheon}
+
+outfunc <- function(event, val, eventname) {
+  out <- data.frame(matrix(NA, ncol = 4, nrow = 3))
+
+  out[1, 1] <- eventname
+  colnames(out) <- c("Outcome", "Model", levels(edata$d_hsSod_cat))
+
+  ## n (%)
+  out[1, 2] <- "n (%)"
+
+  ev <- edata %>%
+    filter(survpop & !is.na(!!sym(event))) %>%
+    group_by(d_hsSod_cat) %>%
+    count(!!sym(event)) %>%
+    mutate(
+      per = fn(n / sum(n) * 100, 1),
+      np = paste0(n, " (", per, "%)")
+    ) %>%
+    filter(!!sym(event) == val)
+
+  out[1, 3:4] <- paste0(
+    ev$np
+  )
+
+  # log regressions
+
+  ## crude
+
+  out[2, 2] <- "Crude OR (95% CI), p-value"
+
+  ormod <- with(imp, glm(formula(paste0(event, "=='", val, "' ~ relevel(d_hsSod_cat, ref = '>=135')")),
+    family = binomial(link = "logit")
+  ))
+  ormodtest <- glm(formula(paste0(event, "=='", val, "' ~ relevel(d_hsSod_cat, ref = '>=135')")), data = edata %>% filter(survpop))
+
+  sormod <- summary(pool(ormod))
+
+  out[2, 3:4] <- c("ref", paste0(
+    fn(exp(sormod$estimate[2]), dig = 2),
+    " (", fn(exp(sormod$estimate[2] - global_z05 * sormod$std.error[2]), dig = 2),
+    "-", fn(exp(sormod$estimate[2] + global_z05 * sormod$std.error[2]), dig = 2), "), ",
+    fn(sormod$p.value[2], dig = 3, p = TRUE)
+  ))
+
+  ## adjusted individual covariates
+
+  out[3, 2] <- "Adjusted OR (95% CI), p-value"
+
+  modvarsuse <- modvars[modvars != event]
+  ormod <- with(imp, glm(formula(paste0(event, "=='", val, "' ~ relevel(d_hsSod_cat, ref = '>=135') + ", paste(modvarsuse, collapse = " + "))),
+    family = binomial(link = "logit")
+  ))
+
+  sormod <- summary(pool(ormod))
+
+  out[3, 3:4] <- c("ref", paste0(
+    fn(exp(sormod$estimate[2]), dig = 2),
+    " (", fn(exp(sormod$estimate[2] - global_z05 * sormod$std.error[2]), dig = 2),
+    "-", fn(exp(sormod$estimate[2] + global_z05 * sormod$std.error[2]), dig = 2), "), ",
+    fn(sormod$p.value[2], dig = 3, p = TRUE)
+  ))
+  return(out)
+}
+```
+
+```{r inhospoutcomes, cache=cacheon, dependson="inhospoutcomesfunc"}
+out1 <- outfunc(
+  event = "d_dcNyha_cat",
+  val = "III-IV",
+  eventname = "NYHA III-IV at discharge"
+)
+
+outall <- rbind(
+  out1
+)
+
+write.xlsx(outall, paste0("./output/tabs/In-hospital outcomes by admisson Natremia_", Sys.Date(), ".xlsx"), rowNames = FALSE, overwrite = T)
+
+default_kable(outall,
+  font_size = 6,
+  caption = "In-hospital outcomes by admisson Natremia"
+)
+```

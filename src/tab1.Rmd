@@ -1,0 +1,119 @@
+```{r tab1, cache=cacheon}
+
+tab1func <- function(tabvars, tabname, data = edata) {
+  tab <- print(
+    CreateTableOne(
+      vars = tabvars,
+      data = data,
+      strata = "natremia"
+    ),
+    smd = FALSE,
+    missing = TRUE,
+    printToggle = FALSE,
+    nonnormal = tabvars,
+    test = TRUE,
+    catDigits = 1,
+    contDigits = 1,
+    explain = FALSE,
+    noSpaces = TRUE
+  )
+  tab <- as_tibble(cbind(var = rownames(tab), tab)) %>%
+    select(-test) %>%
+    select(var, Missing, everything())
+
+  tab <- tab %>%
+    # to get labs in place
+    mutate(
+      var_tmp = str_split(var, " = ", simplify = TRUE)[, 1],
+      val_tmp = str_split(var, " = ", simplify = TRUE)[, 2],
+      val_tmp = if_else(val_tmp == "Yes", "", val_tmp)
+    )
+
+  tab <- left_join(tab,
+    esclab %>%
+      select(variable, label),
+    by = c("var_tmp" = "variable")
+  ) %>%
+    mutate(
+      Variable = coalesce(label, var_tmp),
+      Variable = if_else(val_tmp != "",
+        paste0(Variable, " ", val_tmp),
+        Variable
+      )
+    )
+
+  write.xlsx(tab %>%
+    select(Variable, Missing:p), paste0("./output/tabs/", tabname, "_", Sys.Date(), ".xlsx"), rowNames = FALSE, overwrite = TRUE)
+
+  # footnotes
+  tab <- tab %>%
+    mutate(
+      footnote1 = if_else(var_tmp %in% modvars, footnote_marker_symbol(1), "")
+    ) %>%
+    unite(footnote, starts_with("footnote"), sep = "") %>%
+    mutate(
+      # so no probs
+      Variable = sanitize_text(Variable),
+      Variable = paste0(Variable, footnote),
+
+      # space in Latex output (fix this other way?)
+      Variable = sub("  ", ". ", Variable)
+    ) %>%
+    select(Variable, Missing:p)
+
+  colnames(tab) <- sanitize_text(c(
+    "Variable", "Missing (%)", levels(edata %>% pull(natremia)), "p-value"
+  ))
+
+  footnote(
+    default_kable(tab,
+      font_size = 4,
+      caption = tabname,
+      longtable = TRUE,
+      escape = FALSE
+    ), # %>%
+    # landscape(),
+    general = c(
+      "Categorical variables are presented with n (%) and tested with chi-square test and continuous variables with median [q1-q3] and tested with Kruskal-Wallis test."
+    ),
+    symbol = c("Included in imputation, logistic and cox regression models")
+  )
+}
+```
+
+
+```{r tab1all, cache=cacheon, dependson = "tab1"}
+tab1func(
+  tabvars = tab1vars,
+  tabname = "Baseline characteristics - All"
+)
+```
+
+\clearpage
+
+```{r tab1ex, cache=cacheon, dependson = "tab1"}
+tab1func(
+  tabvars = tab1vars,
+  tabname = "Baseline characteristics - Long-term outcome population", 
+  data = edata %>% filter(survpop)
+)
+```
+
+\clearpage
+
+```{r tab2all, cache=cacheon, dependson = "tab1"}
+tab1func(
+  tabname = "Clinical course - All",
+  tabvars = tab2vars
+)
+```
+
+\clearpage
+
+```{r tab2ex, cache=cacheon, dependson = "tab1"}
+tab1func(
+  tabname = "Clinical course - Long-term outcome population",
+  tabvars = tab2vars, 
+  data = edata %>% filter(survpop)
+)
+```

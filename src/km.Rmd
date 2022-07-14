@@ -1,0 +1,106 @@
+```{r km, cache=cacheon}
+
+kmfunc <- function(time, event, eventname, ymax = 1) {
+  fits <- survfit(formula(paste0("Surv(", time, ",", event, "== 1) ~ natremia")),
+    data = edata %>% filter(survpop)
+  )
+
+  # cox model
+  amod <- with(imp, coxph(formula(paste0(
+    "Surv(", time, ",", event, " == 1) ~ relevel(natremia, ref = 'Normo/Normo') + ", paste(modvars, collapse = " + ")
+  ))))
+
+  ## df the number of events minus the regression coefficients.
+  ## There is support for this from middle of page 149 of the book by Parmer & Machin (ISBN 0471936405)
+  asmod <- summary(pool(amod,
+    dfcom =
+      (amod$analyses[[1]]$nevent - length(amod$analyses[[1]]$coefficients))
+  ))
+
+  hrprint <- paste0(
+    fn(exp(asmod$estimate[1:3]), dig = 2),
+    " (", fn(exp(asmod$estimate[1:3] - global_z05 * asmod$std.error[1:3]), dig = 2),
+    "-", fn(exp(asmod$estimate[1:3] + global_z05 * asmod$std.error[1:3]), dig = 2), "), ",
+    fn(asmod$p.value[1:3], dig = 3, p = TRUE)
+  )
+
+  # c(bottom, left, top, right)
+  cexmy <- 1.2
+  par(mar = c(8.5, 7.6, 1, 1.5) + 0.1)
+
+  plots <- plot(fits,
+    fun = "event",
+    ylab = paste0(eventname, " (%)"),
+    yscale = 100,
+    xscale = 30.5,
+    col = global_cols[c(2, 4, 6, 8)],
+    mark.time = FALSE,
+    bty = "n",
+    xlim = c(0, 12 * 30),
+    ylim = c(0, ymax + 0.05),
+    xlab = "Follow-up (months)",
+    cex.lab = cexmy,
+    axes = F,
+    lwd = 4,
+    lty = 1,
+    xaxs = "i", yaxs = "i"
+  )
+
+  axis(2, seq(0, ymax + 0.05, 0.05), c(seq(0, ymax * 100, 5), 100), las = 2, cex.axis = cexmy)
+  axis(1, at = seq(0, 12, 2) * 30, seq(0, 12, 2), cex.axis = cexmy)
+  plotrix::axis.break(2, ymax + 0.025, style = "slash")
+
+  # ypos <- 1 - summary(fits, 9 * 30, extend = T)$surv
+
+  levs <- levels(edata %>% pull(natremia))
+
+  # ylabs <- bind_cols(
+  #  ypos = ypos,
+  #  ytext = levs
+  # ) %>%
+  #  arrange(ypos)
+
+  # text(ylabs$ypos[1] - yposplus[1], x = 9 * 30, ylabs$ytext[1], pos = 4, cex = cexmy)
+  # text(ylabs$ypos[2] + yposplus[2], x = 9 * 30, ylabs$ytext[2], pos = 2, cex = cexmy)
+
+  # texthr <- paste0(levs, " ", c(hrprint, "ref"))
+  legend(x = 5.5 * 30, y = ymax + 0.05, c("Adjusted HR (95% CI), p-value", hrprint, "ref"), cex = cexmy, adj = 0.5, bty = "n")
+  legend(
+    x = 0.5, y = ymax + 0.05, bty = "n", c("", levs), lty = 1,
+    col = c("white", global_cols[c(2, 4, 6, 8)]), cex = cexmy, lwd = 4,
+    text.col = c("white", global_cols[c(2, 4, 6, 8)])
+  )
+  # text(y = 0.28, x = 4 * 30, "Adjusted HR (95% CI), p-value", cex = cexmy, adj = 0.5)
+
+  mtext("No. at risk", side = 1, line = 3.7, at = -90, adj = 0, cex = cexmy, font = 2)
+  mtext(levs[1], side = 1, line = 4.7, at = -90, adj = 0, cex = cexmy, col = global_cols[2])
+  mtext(levs[2], side = 1, line = 5.7, at = -90, adj = 0, cex = cexmy, col = global_cols[4])
+  mtext(levs[3], side = 1, line = 6.7, at = -90, adj = 0, cex = cexmy, col = global_cols[6])
+  mtext(levs[4], side = 1, line = 7.7, at = -90, adj = 0, cex = cexmy, col = global_cols[8])
+
+  nrisk <- summary(fits, seq(0, 12, 2) * 30, extend = T)
+
+  axis(1, at = seq(0, 12, 2) * 30, labels = nrisk$n.risk[nrisk$strata == paste0("natremia=", levs[1])], line = 3.7, tick = FALSE, cex.axis = cexmy)
+  axis(1, at = seq(0, 12, 2) * 30, labels = nrisk$n.risk[nrisk$strata == paste0("natremia=", levs[2])], line = 4.7, tick = FALSE, cex.axis = cexmy)
+  axis(1, at = seq(0, 12, 2) * 30, labels = nrisk$n.risk[nrisk$strata == paste0("natremia=", levs[3])], line = 5.7, tick = FALSE, cex.axis = cexmy)
+  axis(1, at = seq(0, 12, 2) * 30, labels = nrisk$n.risk[nrisk$strata == paste0("natremia=", levs[4])], line = 6.7, tick = FALSE, cex.axis = cexmy)
+}
+```
+
+```{r kmacdeathhfh, fig.cap="All-cause mortality/First HF hospitalization", cache=cacheon, dependson="km", fig.width=8, fig.height=7}
+kmfunc(
+  time = "outtime_hosphf",
+  event = "out_deathhosphf",
+  eventname = "All-cause mortality/First HFH",
+  ymax = 0.6
+)
+```
+
+```{r kmacdeath, fig.cap="All-cause mortality", cache=cacheon, dependson="km", fig.width=8, fig.height=7}
+kmfunc(
+  time = "outtime_death",
+  event = "out_death",
+  eventname = "All-cause mortality",
+  ymax = 0.4
+)
+```

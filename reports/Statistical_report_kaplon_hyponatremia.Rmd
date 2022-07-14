@@ -1,0 +1,194 @@
+---
+title: 'Statistical report: Changes in sodium concentration during hospitalization for acute heart failure and their relation to long-term outcomes – from the ESC HFA EORP Heart Failure Long-Term Registry'
+subtitle: 'DRAFT'
+author: 'Statistician: Lina Benson'
+  
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    dev: cairo_pdf
+    fig_caption: yes
+    fig_height: 7
+    fig_width: 7
+    number_sections: yes
+link-citations: yes
+bibliography: references.bib
+nocite: '@*'
+urlcolor: blue
+linkcolor: black
+header-includes:
+   - \usepackage{draftwatermark}
+   - \usepackage{subfig}
+   - \usepackage{pdflscape}
+   - \newcommand{\blandscape}{\begin{landscape}}
+   - \newcommand{\elandscape}{\end{landscape}}
+---
+
+\newpage 
+\tableofcontents 
+\listoftables
+\listoffigures
+\newpage
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE, include = TRUE, comment = "",
+  warning = FALSE, message = FALSE, fig.pos = "H",
+  fig.path = "../output/figs/"
+)
+options(knitr.kable.NA = "")
+```
+
+```{r adjust_directory_if_needed, include=FALSE}
+# Uncomment lines below if rmd file is placed in a subdirectory
+knitr::opts_knit$set(root.dir = normalizePath("../"))
+```
+
+```{r load_project}
+# 1. Set options in config/global.dcf
+# 2. Load packages listed in config/global.dcf
+# 3. Import functions and code in lib directory
+
+ProjectTemplate::reload.project()
+
+cacheon <- TRUE
+```             
+
+# Data handling
+
+## Data source
+
+hf3_lt_fu_data_soladis_jan19.sas7bdat (from the folder DATABASE_ANALYZED.ZIP). 
+
+## Inclusion/exclusion criteria
+
+```{r flow}
+default_kable(flow, caption = "Flowchart")
+```
+
+First patient in: `r min(edata$num_dmVisitdt)` and last patient in: `r max(edata$num_dmVisitdt)`. 
+
+The median age (IQR) is `r edata %>% summarise(med = fn(median(num_age, na.rm = TRUE), dig = 1),
+                                             q1 = fn(quantile(num_age, na.rm = TRUE, probs = 0.25), dig = 1),
+                                             q3 = fn(quantile(num_age, na.rm = TRUE, probs = 0.75), dig = 1)) %>%
+                                   mutate(out = paste0(med, " (", q1, "-", q3, ")")) %>%
+                                   pull(out)` and 
+`r edata %>% count(num_dmgender) %>%
+  mutate(perc = fn(n / sum(n) * 100, 1)) %>%
+  filter(num_dmgender == "Female") %>%
+  pull(perc)`% females.    
+
+# Statistical analysis 
+
+## General
+
+All analyses were performed using `r sessionInfo()$R.version$version.string` [@r]. 
+The level of significance is set to 5%, two-sided. No adjustment for multiple 
+comparisons were made and therefore the results should be viewed with some care.
+
+## Missing data
+
+For patients with missing information on the date of hospitalisation or date of hospitalisation prior to inclusion, 
+the time to hospitalisation was imputed with half the time to last
+follow-up. Further, times to hospitalisation that were larger than time 
+to death or last follow-up were set to death or last follow-up. 
+
+Missing data for the covariates included in the models was imputed with multiple 
+imputation using mice [@mice] for 10 datasets and 10 iterations. 
+Variables included in the imputation model are indicated in Table \ref{tab:tab1all}. 
+The primary outcome, all-cause death or first re-hospitalization for HF at follow-up, was included as the Nelson-Aalen estimator. 
+Natremia was not included in the model
+
+\clearpage
+
+## Baseline characteristics
+
+```{r, child = "./src/tab1.Rmd"}
+
+```
+
+\clearpage
+
+## Outcomes - longterm
+
+The outcome analysis is performed on the long-term outcome population (patients with follow-up data).
+
+Time is from date of discharge, or if this is missing, date of admission and 
+censored at death not defined as an event or end of follow-up.  
+
+The outcomes are presented with cumulative incidence curves and Cox proportional hazards regressions were 
+used to model the time to first event. Adjustment was performed for variables indicated in Table \ref{tab:tab1all} 
+and the selection was based on clinical judgement. 
+
+The median (q1-q3) follow-up for the long-term outcomes is 
+`r edata %>% filter(survpop) %>% summarise(med = fn(median(outtime_death / 365.25 * 12), dig = 1),
+                                             q1 = fn(quantile(outtime_death / 365.25 * 12, probs = 0.25), dig = 1),
+                                             q3 = fn(quantile(outtime_death / 365.25 * 12, probs = 0.75), dig = 1)) %>%
+                                   mutate(out = paste0(med, " (", q1, "-", q3, ")")) %>%
+                                   pull(out)` months for a total of 
+                                   `r edata %>% filter(survpop) %>% 
+                                   summarise(sumpy = fn(sum(outtime_death) / 365.25, dig = 0)) %>%
+                                   pull(sumpy)` patient-years of follow-up.
+
+```{r, child = "./src/km.Rmd"}
+
+```
+
+\clearpage
+
+```{r, child = "./src/outtab.Rmd"}
+
+```
+
+### Assumptions
+
+The proportional hazards assumption was investigated using the scaled Schoenfeld 
+residuals (cox.zph in [@survival-package]). => XXX
+
+### Subgroups
+
+Subgroup analysis are performed for selected variables
+using interaction effects on the long-term outcome population (patients with follow-up data). 
+
+```{r, child = "./src/subout.Rmd"}
+
+```
+
+\clearpage
+
+## Outcomes - in-hospital
+
+```{r, child = "./src/inhospoutcomes.Rmd"}
+
+```
+
+\clearpage
+
+## Predictors
+
+Modelled using logistic regression including the variables shown in the table. 
+Performed on the long-term outcome population (patients with follow-up data)???
+
+```{r, child = "./src/predictors.Rmd"}
+
+```
+
+\clearpage
+
+# Reproducibility
+
+## R session information {#sessioninfo}
+
+```{r sessinfo}
+sessionInfo()
+```
+
+## R code
+
+The R code for all data handling and statistical analyses are found: 
+https://github.com/KIHeartFailure/eschyponatremia. On publication
+the repository will be made public so as to 
+link to it from the resulting article for increased transparency and code sharing.
+No data or output is stored in the repository. 
+
+# References
