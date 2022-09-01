@@ -1,6 +1,6 @@
 ```{r predadmission, cache=cacheon}
 
-ormod <- with(imp, glm(formula(paste0("d_hsSod_cat == '<135' ~ ", paste(modvars, collapse = " + "))),
+ormod <- with(imp, glm(formula(paste0("d_hsSod_cat == '<135' ~ ", paste(logvars, collapse = " + "))),
   family = binomial(link = "logit")
 ))
 
@@ -32,9 +32,9 @@ default_kable(outor,
 
 ```{r preddischarge, cache=cacheon}
 
-impdata <- miceadds::subset_datlist(imp, subset = edata %>% filter(survpop) %>% pull(d_hsSod_cat) == "<135")
+impdata <- miceadds::subset_datlist(imp, subset = edata %>% filter(!is.na(d_dcSod_cat)) %>% pull(d_hsSod_cat) == "<135")
 
-ormod <- with(impdata, glm(formula(paste0("d_dcSod_cat == '>=135' ~ ", paste(modvars, collapse = " + "))),
+ormod <- with(impdata, glm(formula(paste0("d_dcSod_cat == '>=135' ~ ", paste(predvars, collapse = " + "))),
   family = binomial(link = "logit")
 ))
 

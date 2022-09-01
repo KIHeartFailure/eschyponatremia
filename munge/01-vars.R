@@ -4,13 +4,12 @@ tab1vars <- c(
   "num_age",
   "d_age_cat",
   "num_dmgender",
-  "num_dmWeight",
-  "num_dmBmi",
   "d_dmBmi_cat",
-  "d_dmHF_cat",
+  "num_dmBmi",
+  "num_dmWeight",
   "d_HFdiagnosis",
+  "d_dmHF_cat",
   "num_dmEtio_c1",
-  "num_dmEflp",
   "prev_mi_cabg_pci",
   "d_dmDev_cat",
   "num_dmStroke",
@@ -24,13 +23,22 @@ tab1vars <- c(
   "num_dmHepa",
   "d_dmThy",
   "num_dmHT",
+  "num_dmDis",
+  "num_dmDepr",
+  "d_no_noncardiac_comorbs", 
   "num_dmSmoking_c1",
 
   # Previous pharmacotherapy
   "num_mdDiurp",
   "d_loopDiurp",
   "d_loopDiurpdose_eqFurosemide",
+  "d_loopDiurpdose_eqFurosemide40",
+  "d_thiazideDiurp",
+  "d_thiazideDiurpdose_eqHydrochlorotiazide",
+  "d_thiazideDiurpdose_eqHydrochlorotiazide25",
   "num_mdALp",
+  "num_mdALpdo",
+  "d_ALpdose_25",
   "d_arb_or_ace_or_arnip",
   "num_mdACEp",
   "num_mdATp",
@@ -40,14 +48,14 @@ tab1vars <- c(
   "num_mdAntiarp",
   "num_mdDigop",
   "num_mdCcbp",
-  "num_mdAntiarp",
   "num_mdAntiplp",
   "num_mdStatp",
   "num_mdNitp",
   "num_mdACp",
   "num_mdNsaip",
   "num_mdAdepp",
-  "num_mdInsp",
+  "d_xanthinep",
+  "nohyponatremiadrugsp",
 
   # Clinical presentation at hospital admission
   "num_dmBpm",
@@ -60,7 +68,7 @@ tab1vars <- c(
   "d_X_pulmc_alvoedema",
   "num_hsOed",
   "num_hsHf",
-  "num_hsFacAf",
+  "d_numhsFacarrhythmic",
   "num_hsFacBrad",
   "num_hsFacMy",
   "num_hsFacUnh",
@@ -68,16 +76,15 @@ tab1vars <- c(
   "num_hsFacRen",
   "num_hsFacIat",
   "num_hsFacNonc",
-  "num_hsFacVa",
   "num_hsFacAne",
 
   # Laboratory findings at hospital admission
   "num_hsNt",
   "num_hsBnp",
-  "d_either_hsNtBnp",
   "num_hsTrop",
   "num_hsSod",
   "num_hsPot",
+  "num_hsGl", 
   "num_hsCre",
   "d_hsCKDEPI",
   "d_hsCKDEPI_cat",
@@ -89,7 +96,7 @@ tab1vars <- c(
   "num_hsHb",
 
   # ECG at hospital admission
-  "num_dcRyth_c1",
+  "num_dcRyth",
   "num_dcLbbb",
   "d_qtcfridericia",
 
@@ -101,11 +108,10 @@ tab1vars <- c(
   "d_LAVI",
   "num_dcLadim",
   "num_dcRsp",
+  "num_dcAorSte",
   "num_dcAorReg",
   "num_dcMitReg",
-  "num_dcTriCus",
-  "num_dcRhCath",
-  "num_dcRhcPap"
+  "num_dcTriCus"
 )
 
 tab2vars <- c(
@@ -118,7 +124,13 @@ tab2vars <- c(
   "num_mdDiurh",
   "d_loopDiurh",
   "d_loopDiurhdose_eqFurosemide",
+  "d_loopDiurhdose_eqFurosemide80",
+  "d_thiazideDiurh",
+  "d_thiazideDiurhdose_eqHydrochlorotiazide",
+  "d_thiazideDiurhdose_eqHydrochlorotiazide25",
   "num_mdALh",
+  "num_mdALhdo",
+  "d_ALhdose_25",
   "d_arb_or_ace_or_arnih",
   "num_mdACEh",
   "num_mdATh",
@@ -128,19 +140,23 @@ tab2vars <- c(
   "num_mdAntiarh",
   "num_mdDigoh",
   "num_mdCcbh",
-  "num_mdAntiarh",
   "num_mdAntiplh",
   "num_mdStath",
   "num_mdNith",
   "num_mdACh",
   "num_mdNsaih",
   "num_mdAdeph",
-  "num_mdInsh",
-  "d_dcCardiov_AF",
+  "d_xanthineh",
+  "nohyponatremiadrugsh",
   "num_dcCora",
   "num_dcPci",
 
   # Clinical status at discharge
+  "num_dcRal",
+  "num_dcJvp",
+  "num_dcEff",
+  "num_dcHep",
+  "num_dcOed",
   "d_change_weight",
   "d_changepercent_weight",
   "d_dcNyha_cat",
@@ -149,6 +165,8 @@ tab2vars <- c(
   "d_dcBpm_cat",
   "num_dcBp1",
   "d_dcBp1_cat",
+  "d_change_Bp1",
+  "d_changepercent_Bp1",
 
   # Laboratory findings on discharge
   "num_dcNt",
@@ -162,6 +180,7 @@ tab2vars <- c(
   "num_dcPot",
   "d_change_Pot",
   "d_changepercent_Pot",
+  "num_dcGl",
   "num_dcCre",
   "d_change_Cre",
   "d_changepercent_Cre",
@@ -184,14 +203,19 @@ tab2vars <- c(
   "num_mdDiurd",
   "d_loopDiurd",
   "d_loopDiurddose_eqFurosemide",
+  "d_loopDiurddose_eqFurosemide40",
+  "d_thiazideDiurd",
+  "d_thiazideDiurddose_eqHydrochlorotiazide",
+  "d_thiazideDiurddose_eqHydrochlorotiazide25",
   "num_mdALd",
+  "num_mdALddo",
+  "d_ALddose_25",
   "d_arb_or_ace_or_arnid",
   "num_mdACEd",
   "num_mdATd",
   "num_mdARNId",
   "num_mdBBd",
   "num_mdAmid",
-  "num_mdAntiard",
   "num_mdDigod",
   "num_mdCcbd",
   "num_mdAntiard",
@@ -201,40 +225,171 @@ tab2vars <- c(
   "num_mdACd",
   "num_mdNsaid",
   "num_mdAdepd",
-  "num_mdInsd"
+  "d_xanthined",
+  "nohyponatremiadrugsd"
 )
 
-modvars <- c(
-  "d_dcEf_cat",
-  "d_age_cat",
+tabmeanvars <- c(
+  "d_change_weight",
+  "d_changepercent_weight"
+)
+
+logvars <- c(
+  # Clinical characteristics
+  "num_age",
   "num_dmgender",
-  "d_dmBmi_cat",
+  "num_dmBmi",
   "num_dmEtio_c1",
-  "d_dmHF_cat",
   "num_dmStroke",
-  "num_dmAfib_c1",
   "num_dmPvd",
   "num_dmDiab_c1",
   "num_dmCopd",
   "num_dmHepa",
+  "d_dmThy",
   "num_dmDis",
   "num_dmDepr",
-  "num_hsFacAf",
-  "num_hsFacMy",
-  "num_hsFacInf",
-  "num_hsFacUnh",
-  "num_hsFacRen",
+  "num_dmSmoking_c1",
+
+  # Heart failure
+  "d_dcEf_cat",
+  "num_dcAorSte",
   "num_dcMitReg",
   "num_dcTriCus",
+  "num_dcRyth",
+
+  # Clinical and laboratory presentation at admission
+  "d_hsNyha_cat",
+  "num_dmBpm",
+  "num_dmBp1",
+  "d_hsCKDEPI",
+  "num_hsPot",
+  "num_hsHb",
+
+  # Previous pharmacotherapy (before hospital admission)
+  "d_thiazideDiurp",
+  "d_loopDiurpmod",
+  "d_ALpmod",
+  "d_arb_or_ace_or_arnip",
+  "num_mdBBp",
+  "num_mdAmip",
+  "num_mdAntiarp",
+  "num_mdDigop",
+  "num_mdCcbp",
+  "num_mdAdepp",
+  "d_xanthinep"
+)
+
+coxvars <- c(
+  # Clinical characteristics
+  "num_age",
+  "num_dmgender",
+  "num_dmBmi",
+  "num_dmEtio_c1",
+  "num_dmStroke",
+  "num_dmPvd",
+  "num_dmDiab_c1",
+  "num_dmCopd",
+  "num_dmHepa",
+  "d_dmThy",
+  "num_dmDis",
+  "num_dmDepr",
+  "num_dmSmoking_c1",
+
+  # Heart failure
+  "d_dcEf_cat",
+  "num_dcAorSte",
+  "num_dcMitReg",
+  "num_dcTriCus",
+  "num_dcRyth",
+
+  # In-hospital course
   "num_hsIntr",
   "num_dcPci",
-  "d_dmBpm_cat",
-  "d_dmBp1_cat",
+
+  # Clinical and laboratory presentation at discharge
+  "num_dcRal",
+  "num_dcJvp",
+  "num_dcEff",
+  "num_dcHep",
+  "num_dcOed",
   "d_dcNyha_cat",
-  "num_dmHyChol",
-  "d_dcHb_cat",
-  "num_mdDiurd",
+  "num_dcBpm",
+  "num_dcBp1",
+  "d_dcCKDEPI",
+  "num_dcPot",
+  "num_dcHb",
+
+  # Discharge pharmacotherapy
+  "d_loopDiurd",
   "num_mdALd",
   "d_arb_or_ace_or_arnid",
-  "num_mdBBd"
+  "num_mdBBd",
+  "num_mdAmid"
+)
+
+predvars <- c(
+  # Clinical characteristics
+  "num_age",
+  "num_dmgender",
+  "num_dmBmi",
+  "num_dmEtio_c1",
+  "num_dmStroke",
+  "num_dmPvd",
+  "num_dmDiab_c1",
+  "num_dmCopd",
+  "num_dmHepa",
+  "d_dmThy",
+  "num_dmDis",
+  "num_dmDepr",
+  "num_dmSmoking_c1",
+
+  # Heart failure
+  "d_dcEf_cat",
+  "num_dcAorSte",
+  "num_dcMitReg",
+  "num_dcTriCus",
+  "num_dcRyth",
+
+  # Clinical and laboratory presentation at admission
+  "d_hsNyha_cat",
+  "num_dmBpm",
+  "num_dmBp1",
+  "d_hsCKDEPI",
+  "num_hsPot",
+  "num_hsHb",
+
+  # In-hospital course
+  "num_hsIntr",
+  "num_dcPci",
+  "d_changepercent_weight",
+  "improvment1class_dcNyha",
+  "d_changepercent_Bp1",
+
+  # Clinical and laboratory presentation at discharge
+  "num_dcRal",
+  "num_dcJvp",
+  "num_dcEff",
+  "num_dcHep",
+  "num_dcOed",
+  "d_dcNyha_cat",
+  "num_dcBnp",
+  "num_dcBp1",
+  "d_dcCKDEPI",
+  "num_dcPot",
+  "num_dcHb",
+
+  # Pharmacotherapy during hospitalization
+  "d_thiazideDiurh",
+  "num_hsProDiu",
+  "d_loopDiurhmod",
+  "num_mdALh",
+  "d_ALhmod",
+  "d_arb_or_ace_or_arnih",
+  "num_mdBBh",
+  "num_mdAmih",
+  "num_mdAntiarh",
+  "num_mdDigoh",
+  "num_mdCcbh",
+  "num_mdAdeph",
+  "d_xanthineh"
 )

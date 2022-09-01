@@ -13,8 +13,10 @@ ProjectTemplate::reload.project(
 
 ProjectTemplate::cache("tab1vars")
 ProjectTemplate::cache("tab2vars")
-ProjectTemplate::cache("tab3vars")
-ProjectTemplate::cache("modvars")
+ProjectTemplate::cache("tabmeanvars")
+ProjectTemplate::cache("logvars")
+ProjectTemplate::cache("coxvars")
+ProjectTemplate::cache("predvars")
 
 ProjectTemplate::cache("flow")
 ProjectTemplate::cache("edata")

@@ -10,7 +10,7 @@ outfunc <- function(event, val, eventname) {
   out[1, 2] <- "n (%)"
 
   ev <- edata %>%
-    filter(survpop & !is.na(!!sym(event))) %>%
+    filter(!is.na(!!sym(event))) %>%
     group_by(d_hsSod_cat) %>%
     count(!!sym(event)) %>%
     mutate(
@@ -47,8 +47,8 @@ outfunc <- function(event, val, eventname) {
 
   out[3, 2] <- "Adjusted OR (95% CI), p-value"
 
-  modvarsuse <- modvars[modvars != event]
-  ormod <- with(imp, glm(formula(paste0(event, "=='", val, "' ~ relevel(d_hsSod_cat, ref = '>=135') + ", paste(modvarsuse, collapse = " + "))),
+  logvarsuse <- logvars[logvars != event]
+  ormod <- with(imp, glm(formula(paste0(event, "=='", val, "' ~ relevel(d_hsSod_cat, ref = '>=135') + ", paste(logvarsuse, collapse = " + "))),
     family = binomial(link = "logit")
   ))
 
@@ -70,9 +70,14 @@ out1 <- outfunc(
   val = "III-IV",
   eventname = "NYHA III-IV at discharge"
 )
+out2 <- outfunc(
+  event = "num_dcVital",
+  val = "Dead",
+  eventname = "In-hospital death"
+)
 
 outall <- rbind(
-  out1
+  out1, out2
 )
 
 write.xlsx(outall, paste0("./output/tabs/In-hospital outcomes by admisson Natremia_", Sys.Date(), ".xlsx"), rowNames = FALSE, overwrite = T)

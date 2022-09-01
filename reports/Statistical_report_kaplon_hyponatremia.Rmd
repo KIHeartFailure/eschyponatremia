@@ -77,6 +77,8 @@ The median age (IQR) is `r edata %>% summarise(med = fn(median(num_age, na.rm = 
   mutate(perc = fn(n / sum(n) * 100, 1)) %>%
   filter(num_dmgender == "Female") %>%
   pull(perc)`% females.    
+  
+From now on the term "all patients" refers to patients with Non-missing sodium at admission. 
 
 # Statistical analysis 
 
@@ -95,9 +97,9 @@ to death or last follow-up were set to death or last follow-up.
 
 Missing data for the covariates included in the models was imputed with multiple 
 imputation using mice [@mice] for 10 datasets and 10 iterations. 
-Variables included in the imputation model are indicated in Table \ref{tab:tab1all}. 
+Variables included in the imputation model are indicated with 1, 2 or 3 in Table \ref{tab:tab1all}-\ref{tab:tab2ex}. 
 The primary outcome, all-cause death or first re-hospitalization for HF at follow-up, was included as the Nelson-Aalen estimator. 
-Natremia was not included in the model
+Natremia was not included in the model.
 
 \clearpage
 
@@ -117,7 +119,7 @@ Time is from date of discharge, or if this is missing, date of admission and
 censored at death not defined as an event or end of follow-up.  
 
 The outcomes are presented with cumulative incidence curves and Cox proportional hazards regressions were 
-used to model the time to first event. Adjustment was performed for variables indicated in Table \ref{tab:tab1all} 
+used to model the time to first event. Adjustment was performed for variables indicated with 2 in Table \ref{tab:tab1all} 
 and the selection was based on clinical judgement. 
 
 The median (q1-q3) follow-up for the long-term outcomes is 
@@ -158,6 +160,9 @@ using interaction effects on the long-term outcome population (patients with fol
 
 ## Outcomes - in-hospital
 
+Modelled using multivariable logistic regression including the variables indicated with 1 in Table \ref{tab:tab1all}-\ref{tab:tab2ex}. 
+Performed on all patients. 
+
 ```{r, child = "./src/inhospoutcomes.Rmd"}
 
 ```
@@ -166,8 +171,9 @@ using interaction effects on the long-term outcome population (patients with fol
 
 ## Predictors
 
-Modelled using logistic regression including the variables shown in the table. 
-Performed on the long-term outcome population (patients with follow-up data)???
+Modelled using univariable logistic regression for the variables shown in Table \ref{tab:tab1all}-\ref{tab:tab2ex} 
+indicated with 1 (hyponatremia at hospital admission) and 3 (amelioration of hyponatremia). 
+Performed on all patients and, for the amelioration of hyponatremia, patients with discharge value of sodium. 
 
 ```{r, child = "./src/predictors.Rmd"}
 

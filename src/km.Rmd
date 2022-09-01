@@ -7,7 +7,7 @@ kmfunc <- function(time, event, eventname, ymax = 1) {
 
   # cox model
   amod <- with(imp, coxph(formula(paste0(
-    "Surv(", time, ",", event, " == 1) ~ relevel(natremia, ref = 'Normo/Normo') + ", paste(modvars, collapse = " + ")
+    "Surv(", time, ",", event, " == 1) ~ relevel(natremia, ref = 'Normo/Normo') + ", paste(coxvars, collapse = " + ")
   ))))
 
   ## df the number of events minus the regression coefficients.

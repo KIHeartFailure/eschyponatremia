@@ -1,5 +1,4 @@
 
-
 # Create vars PRIOR to imputation (used in imp model) ------
 
 edata <- edata %>%
@@ -12,15 +11,15 @@ edata <- edata %>%
     levels = 1:3,
     labels = c("<40", "40-49", ">=50")
     ),
-    d_age_cat = case_when(
-      num_age < 65 ~ "<65",
-      num_age >= 65 ~ ">=65"
-    ),
-    d_dmBmi_cat = case_when(
-      is.na(num_dmBmi) ~ NA_character_,
-      num_dmBmi < 25 ~ "1.<25",
-      num_dmBmi >= 25 ~ "2.>=25"
-    ),
+    d_age_cat = factor(case_when(
+      num_age < 65 ~ 1,
+      num_age >= 65 ~ 2
+    ), levels = 1:2, labels = c("<65", ">=65")), 
+    d_dmBmi_cat = factor(case_when(
+      is.na(num_dmBmi) ~ NA_real_,
+      num_dmBmi < 30 ~ 1,
+      num_dmBmi >= 30 ~ 2
+    ), levels = 1:2, labels = c("<30", ">=30")), 
     prev_mi_cabg_pci = factor(case_when(
       is.na(num_dmMi) | is.na(num_dmPci) | is.na(num_dmCabg) ~ NA_real_,
       num_dmMi == "Yes" | num_dmPci == "Yes" | num_dmCabg == "Yes" ~ 1,
@@ -73,6 +72,8 @@ edata <- edata %>%
     levels = 1:4,
     labels = c("Hypo/Hypo", "Hypo/Normo", "Normo/Hypo", "Normo/Normo")
     ),
+    d_change_Bp1 = num_dcBp1 - num_dmBp1,
+    d_changepercent_Bp1 = (num_dcBp1 - num_dmBp1) / num_dmBp1 * 100,
     d_change_Sod = num_dcSod - num_hsSod,
     d_changepercent_Sod = (num_dcSod - num_hsSod) / num_hsSod * 100,
     d_change_Pot = num_dcPot - num_hsPot,
@@ -150,12 +151,12 @@ edata <- edata %>%
       num_dmEtio == "Ischemic heart disease not documented by coronary angiography" ~ "IHD not documented by ca",
       TRUE ~ as.character(num_dmEtio)
     )),
-    d_dmDev_cat = case_when(
-      is.na(num_dmDev) ~ NA_character_,
-      num_dmDev %in% c("No") ~ "1.No",
-      num_dmDev %in% c("PM") ~ "2.PM",
-      num_dmDev %in% c("CRT-P", "CRT-D", "ICD") ~ "3.CRT/ICD"
-    ),
+    d_dmDev_cat = factor(case_when(
+      is.na(num_dmDev) ~ NA_real_,
+      num_dmDev %in% c("No") ~ 1,
+      num_dmDev %in% c("PM") ~ 2,
+      num_dmDev %in% c("CRT-P", "CRT-D", "ICD") ~ 3
+    ),levels = 1:3, labels = c("No", "PM", "CRT/ICD")),
 
     # no of non-cardiac comorbs
     d_dmThy = case_when(
@@ -209,6 +210,12 @@ edata <- edata %>%
     levels = 1:2,
     labels = c("<= 7 days", ">7 days")
     ),
+    d_numhsFacarrhythmic = factor(case_when(
+      is.na(num_hsFacAf) | is.na(num_hsFacVa) ~ NA_real_,
+      num_hsFacAf == "Yes" | num_hsFacVa == "Yes" ~ 1,
+      TRUE ~ 0
+    ), levels = 0:1, labels = c("No", "Yes")),
+    # medications
     d_loopDiurp = case_when(
       is.na(num_mdDiurp_c2) ~ NA_character_,
       num_mdDiurp_c2 %in% c("Flurosemide", "Torasemide", "Bumetanide") |
@@ -231,6 +238,44 @@ edata <- edata %>%
       num_mdDiurp_c2 %in% c("Flurosemide", "Torasemide", "Bumetanide") ~ tmp_dosedp1,
       num_mdDiur2p_c2 %in% c("Flurosemide", "Torasemide", "Bumetanide") ~ tmp_dosedp2
     ),
+    d_loopDiurpdose_eqFurosemide40 = factor(case_when(
+      d_loopDiurpdose_eqFurosemide <= 40 ~ 0,
+      d_loopDiurpdose_eqFurosemide > 40 ~ 1,
+    ), levels = 0:1, labels = c("No", "Yes")),
+    d_loopDiurpmod = factor(case_when(
+      d_loopDiurp == "Yes" & d_loopDiurpdose_eqFurosemide40 == "No" | d_loopDiurp == "No" ~ 1,
+      d_loopDiurp == "Yes" & d_loopDiurpdose_eqFurosemide40 == "Yes" ~ 2
+    ),
+    levels = 1:2, labels = c("No/<=40", ">40")
+    ),
+    d_thiazideDiurp = case_when(
+      is.na(num_mdDiurp_c2) ~ NA_character_,
+      num_mdDiurp_c2 %in% c("Hydrochlorotiazide", "Bendrofluazide", "Chlorthalidone", "Indapamide") |
+        num_mdDiur2p_c2 %in% c("Hydrochlorotiazide", "Bendrofluazide", "Chlorthalidone", "Indapamide") ~ "Yes",
+      TRUE ~ "No"
+    ),
+    tmp_tdosedp1 = case_when(
+      num_mdDiurp_c2 == "Hydrochlorotiazide" ~ num_mdDiurpdo / 25 * 25,
+      num_mdDiurp_c2 == "Bendrofluazide" ~ num_mdDiurpdo / 2.5 * 25,
+      num_mdDiurp_c2 == "Chlorthalidone" ~ num_mdDiurpdo / 12.5 * 25,
+      num_mdDiurp_c2 == "Indapamide" ~ num_mdDiurpdo / 1.25 * 25
+    ),
+    tmp_tdosedp2 = case_when(
+      num_mdDiur2p_c2 == "Hydrochlorotiazide" ~ num_mdDiur2pdo / 40 * 25,
+      num_mdDiur2p_c2 == "Bendrofluazide" ~ num_mdDiur2pdo / 2.5 * 25,
+      num_mdDiur2p_c2 == "Chlorthalidone" ~ num_mdDiur2pdo / 12.5 * 25,
+      num_mdDiur2p_c2 == "Indapamide" ~ num_mdDiur2pdo / 1.25 * 25
+    ),
+    d_thiazideDiurpdose_eqHydrochlorotiazide = case_when(
+      num_mdDiurp_c2 %in% c("Hydrochlorotiazide", "Bendrofluazide", "Chlorthalidone", "Indapamide") &
+        num_mdDiur2p_c2 %in% c("Hydrochlorotiazide", "Bendrofluazide", "Chlorthalidone", "Indapamide") ~ tmp_tdosedp1 + tmp_tdosedp2,
+      num_mdDiurp_c2 %in% c("Hydrochlorotiazide", "Bendrofluazide", "Chlorthalidone", "Indapamide") ~ tmp_tdosedp1,
+      num_mdDiur2p_c2 %in% c("Hydrochlorotiazide", "Bendrofluazide", "Chlorthalidone", "Indapamide") ~ tmp_tdosedp2
+    ),
+    d_thiazideDiurpdose_eqHydrochlorotiazide25 = factor(case_when(
+      d_thiazideDiurpdose_eqHydrochlorotiazide < 25 ~ 0,
+      d_thiazideDiurpdose_eqHydrochlorotiazide >= 25 ~ 1,
+    ), levels = 0:1, labels = c("No", "Yes")),
     d_loopDiurh = case_when(
       is.na(num_mdDiurh_c2) ~ NA_character_,
       num_mdDiurh_c2 %in% c("Flurosemide", "Torasemide", "Bumetanide") |
@@ -253,31 +298,128 @@ edata <- edata %>%
       num_mdDiurh_c2 %in% c("Flurosemide", "Torasemide", "Bumetanide") ~ tmp_dosedh1,
       num_mdDiur2h_c2 %in% c("Flurosemide", "Torasemide", "Bumetanide") ~ tmp_dosedh2
     ),
+    d_loopDiurhdose_eqFurosemide80 = factor(case_when(
+      d_loopDiurhdose_eqFurosemide <= 80 ~ 0,
+      d_loopDiurhdose_eqFurosemide > 80 ~ 1,
+    ), levels = 0:1, labels = c("No", "Yes")),
+    d_loopDiurhmod = factor(case_when(
+      d_loopDiurh == "Yes" & d_loopDiurhdose_eqFurosemide80 == "No" | d_loopDiurh == "No" ~ 1,
+      d_loopDiurh == "Yes" & d_loopDiurhdose_eqFurosemide80 == "Yes" ~ 2
+    ),
+    levels = 1:2, labels = c("No/<=80", ">80")
+    ),
+    d_thiazideDiurh = case_when(
+      is.na(num_mdDiurh_c2) ~ NA_character_,
+      num_mdDiurh_c2 %in% c("Hydrochlorotiazide", "Bendrofluazide", "Chlorthalidone", "Indapamide") |
+        num_mdDiur2h_c2 %in% c("Hydrochlorotiazide", "Bendrofluazide", "Chlorthalidone", "Indapamide") ~ "Yes",
+      TRUE ~ "No"
+    ),
+    tmp_tdosedh1 = case_when(
+      num_mdDiurh_c2 == "Hydrochlorotiazide" ~ num_mdDiurhdo / 25 * 25,
+      num_mdDiurh_c2 == "Bendrofluazide" ~ num_mdDiurhdo / 2.5 * 25,
+      num_mdDiurh_c2 == "Chlorthalidone" ~ num_mdDiurhdo / 12.5 * 25,
+      num_mdDiurh_c2 == "Indapamide" ~ num_mdDiurhdo / 1.25 * 25
+    ),
+    tmp_tdosedh2 = case_when(
+      num_mdDiur2h_c2 == "Hydrochlorotiazide" ~ num_mdDiur2hdo / 40 * 25,
+      num_mdDiur2h_c2 == "Bendrofluazide" ~ num_mdDiur2hdo / 2.5 * 25,
+      num_mdDiur2h_c2 == "Chlorthalidone" ~ num_mdDiur2hdo / 12.5 * 25,
+      num_mdDiur2h_c2 == "Indapamide" ~ num_mdDiur2hdo / 1.25 * 25
+    ),
+    d_thiazideDiurhdose_eqHydrochlorotiazide = case_when(
+      num_mdDiurh_c2 %in% c("Hydrochlorotiazide", "Bendrofluazide", "Chlorthalidone", "Indapamide") &
+        num_mdDiur2h_c2 %in% c("Hydrochlorotiazide", "Bendrofluazide", "Chlorthalidone", "Indapamide") ~ tmp_tdosedh1 + tmp_tdosedh2,
+      num_mdDiurh_c2 %in% c("Hydrochlorotiazide", "Bendrofluazide", "Chlorthalidone", "Indapamide") ~ tmp_tdosedh1,
+      num_mdDiur2h_c2 %in% c("Hydrochlorotiazide", "Bendrofluazide", "Chlorthalidone", "Indapamide") ~ tmp_tdosedh2
+    ),
+    d_thiazideDiurhdose_eqHydrochlorotiazide25 = factor(case_when(
+      d_thiazideDiurhdose_eqHydrochlorotiazide < 25 ~ 0,
+      d_thiazideDiurhdose_eqHydrochlorotiazide >= 25 ~ 1,
+    ), levels = 0:1, labels = c("No", "Yes")),
     d_loopDiurd = case_when(
       is.na(num_mdDiurd_c2) ~ NA_character_,
       num_mdDiurd_c2 %in% c("Flurosemide", "Torasemide", "Bumetanide") |
         num_mdDiur2d_c2 %in% c("Flurosemide", "Torasemide", "Bumetanide") ~ "Yes",
       TRUE ~ "No"
     ),
-    tmp_dosed1 = case_when(
+    tmp_dosedd1 = case_when(
       num_mdDiurd_c2 == "Flurosemide" ~ num_mdDiurddo / 40 * 40,
       num_mdDiurd_c2 == "Torasemide" ~ num_mdDiurddo / 10 * 40,
       num_mdDiurd_c2 == "Bumetanide" ~ num_mdDiurddo / 1 * 40
     ),
-    tmp_dosed2 = case_when(
+    tmp_dosedd2 = case_when(
       num_mdDiur2d_c2 == "Flurosemide" ~ num_mdDiur2ddo / 40 * 40,
       num_mdDiur2d_c2 == "Torasemide" ~ num_mdDiur2ddo / 10 * 40,
       num_mdDiur2d_c2 == "Bumetanide" ~ num_mdDiur2ddo / 1 * 40
     ),
     d_loopDiurddose_eqFurosemide = case_when(
       num_mdDiurd_c2 %in% c("Flurosemide", "Torasemide", "Bumetanide") &
-        num_mdDiur2d_c2 %in% c("Flurosemide", "Torasemide", "Bumetanide") ~ tmp_dosed1 + tmp_dosed2,
-      num_mdDiurd_c2 %in% c("Flurosemide", "Torasemide", "Bumetanide") ~ tmp_dosed1,
-      num_mdDiur2d_c2 %in% c("Flurosemide", "Torasemide", "Bumetanide") ~ tmp_dosed2
+        num_mdDiur2d_c2 %in% c("Flurosemide", "Torasemide", "Bumetanide") ~ tmp_dosedd1 + tmp_dosedd2,
+      num_mdDiurd_c2 %in% c("Flurosemide", "Torasemide", "Bumetanide") ~ tmp_dosedd1,
+      num_mdDiur2d_c2 %in% c("Flurosemide", "Torasemide", "Bumetanide") ~ tmp_dosedd2
     ),
+    d_loopDiurddose_eqFurosemide40 = factor(case_when(
+      d_loopDiurddose_eqFurosemide <= 40 ~ 0,
+      d_loopDiurddose_eqFurosemide > 40 ~ 1,
+    ), levels = 0:1, labels = c("No", "Yes")),
+    d_thiazideDiurd = case_when(
+      is.na(num_mdDiurd_c2) ~ NA_character_,
+      num_mdDiurd_c2 %in% c("Hydrochlorotiazide", "Bendrofluazide", "Chlorthalidone", "Indapamide") |
+        num_mdDiur2d_c2 %in% c("Hydrochlorotiazide", "Bendrofluazide", "Chlorthalidone", "Indapamide") ~ "Yes",
+      TRUE ~ "No"
+    ),
+    tmp_tdosedd1 = case_when(
+      num_mdDiurd_c2 == "Hydrochlorotiazide" ~ num_mdDiurddo / 25 * 25,
+      num_mdDiurd_c2 == "Bendrofluazide" ~ num_mdDiurddo / 2.5 * 25,
+      num_mdDiurd_c2 == "Chlorthalidone" ~ num_mdDiurddo / 12.5 * 25,
+      num_mdDiurd_c2 == "Indapamide" ~ num_mdDiurddo / 1.25 * 25
+    ),
+    tmp_tdosedd2 = case_when(
+      num_mdDiur2d_c2 == "Hydrochlorotiazide" ~ num_mdDiur2ddo / 40 * 25,
+      num_mdDiur2d_c2 == "Bendrofluazide" ~ num_mdDiur2ddo / 2.5 * 25,
+      num_mdDiur2d_c2 == "Chlorthalidone" ~ num_mdDiur2ddo / 12.5 * 25,
+      num_mdDiur2d_c2 == "Indapamide" ~ num_mdDiur2ddo / 1.25 * 25
+    ),
+    d_thiazideDiurddose_eqHydrochlorotiazide = case_when(
+      num_mdDiurd_c2 %in% c("Hydrochlorotiazide", "Bendrofluazide", "Chlorthalidone", "Indapamide") &
+        num_mdDiur2d_c2 %in% c("Hydrochlorotiazide", "Bendrofluazide", "Chlorthalidone", "Indapamide") ~ tmp_tdosedd1 + tmp_tdosedd2,
+      num_mdDiurd_c2 %in% c("Hydrochlorotiazide", "Bendrofluazide", "Chlorthalidone", "Indapamide") ~ tmp_tdosedd1,
+      num_mdDiur2d_c2 %in% c("Hydrochlorotiazide", "Bendrofluazide", "Chlorthalidone", "Indapamide") ~ tmp_tdosedd2
+    ),
+    d_thiazideDiurddose_eqHydrochlorotiazide25 = factor(case_when(
+      d_thiazideDiurddose_eqHydrochlorotiazide < 25 ~ 0,
+      d_thiazideDiurddose_eqHydrochlorotiazide >= 25 ~ 1,
+    ), levels = 0:1, labels = c("No", "Yes")),
+    d_ALpdose_25 = factor(case_when(
+      num_mdALpdo <= 25 ~ 0,
+      num_mdALpdo > 25 ~ 1,
+    ), levels = 0:1, labels = c("No", "Yes")),
+    d_ALpmod = factor(case_when(
+      num_mdALp == "Yes" & d_ALpdose_25 == "No" | num_mdALp == "No" ~ 1,
+      num_mdALp == "Yes" & d_ALpdose_25 == "Yes" ~ 2
+    ),
+    levels = 1:2, labels = c("No/<=25", ">25")
+    ),
+    d_ALhdose_25 = factor(case_when(
+      num_mdALhdo <= 25 ~ 0,
+      num_mdALhdo > 25 ~ 1,
+    ), levels = 0:1, labels = c("No", "Yes")),
+    d_ALhmod = factor(case_when(
+      num_mdALh == "Yes" & d_ALhdose_25 == "No" | num_mdALh == "No" ~ 1,
+      num_mdALh == "Yes" & d_ALhdose_25 == "Yes" ~ 2
+    ), levels = 1:2, labels = c("No/<=25", ">25")),
+    d_ALddose_25 = factor(case_when(
+      num_mdALddo <= 25 ~ 0,
+      num_mdALddo > 25 ~ 1,
+    ), levels = 0:1, labels = c("No", "Yes")),
     d_arb_or_ace_or_arnip = case_when(
       is.na(num_mdACEp) | is.na(num_mdATp) ~ NA_character_,
       num_mdACEp == "Yes" | num_mdATp == "Yes" | num_mdARNIp == "Yes" ~ "Yes",
+      TRUE ~ "No"
+    ),
+    d_arb_or_ace_or_arnih = case_when(
+      is.na(num_mdACEh) | is.na(num_mdATh) ~ NA_character_,
+      num_mdACEh == "Yes" | num_mdATh == "Yes" | num_mdARNIh == "Yes" ~ "Yes",
       TRUE ~ "No"
     ),
     d_arb_or_ace_or_arnid = case_when(
@@ -285,6 +427,21 @@ edata <- edata %>%
       num_mdACEd == "Yes" | num_mdATd == "Yes" | num_mdARNId == "Yes" ~ "Yes",
       TRUE ~ "No"
     ),
+    d_xanthinep = factor(case_when(
+      is.na(num_mdcopdp_c2) ~ NA_real_,
+      num_mdcopdp_c2 == "Xanthine agents" ~ 1,
+      TRUE ~ 0
+    ), levels = 0:1, labels = c("No", "Yes")),
+    d_xanthineh = factor(case_when(
+      is.na(num_mdcopdh_c2) ~ NA_real_,
+      num_mdcopdh_c2 == "Xanthine agents" ~ 1,
+      TRUE ~ 0
+    ), levels = 0:1, labels = c("No", "Yes")),
+    d_xanthined = factor(case_when(
+      is.na(num_mdcopdd_c2) ~ NA_real_,
+      num_mdcopdd_c2 == "Xanthine agents" ~ 1,
+      TRUE ~ 0
+    ), levels = 0:1, labels = c("No", "Yes")),
     d_change_f1Nt = num_f1Nt - num_hsNt,
     d_changepercent_f1Nt = (num_f1Nt - num_hsNt) / num_hsNt * 100,
     d_change_f1Bnp = num_f1Bnp - num_hsBnp,
@@ -476,6 +633,30 @@ edata <- edata %>%
     num_dmDis, num_dmDepr,
     num_dmPark, num_dmRheu,
     d_anemia
+  ) == "Yes")) %>%
+  mutate(nohyponatremiadrugsp = rowSums(select(
+    ., d_loopDiurp,
+    d_thiazideDiurp,
+    num_mdALp,
+    num_mdAdepp,
+    num_mdAmip, num_mdACp,
+    d_xanthinep
+  ) == "Yes")) %>%
+  mutate(nohyponatremiadrugsh = rowSums(select(
+    ., d_loopDiurh,
+    d_thiazideDiurh,
+    num_mdALh,
+    num_mdAdeph,
+    num_mdAmip, num_mdACh,
+    d_xanthineh
+  ) == "Yes")) %>%
+  mutate(nohyponatremiadrugsd = rowSums(select(
+    ., d_loopDiurd,
+    d_thiazideDiurd,
+    num_mdALd,
+    num_mdAdepd,
+    num_mdAmid, num_mdACd,
+    d_xanthined
   ) == "Yes")) %>%
   mutate_if(is.character, as.factor) %>%
   select(-starts_with("tmp_"))

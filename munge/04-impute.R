@@ -3,10 +3,9 @@
 # Impute missing values ---------------------------------------------------
 
 edataforimp <- edata %>%
-  filter(survpop) %>% # only impute analysis pop that will be used for models OBS!!!!!! THIS SHOULD CHANGE IF ALL PATS IN LOG REG!!!!!!!!!
-  select(patientid, natremia, !!!syms(modvars), starts_with("out"), d_hsSod_cat, d_dcSod_cat)
+  select(patientid, natremia, !!!syms(coxvars), !!!syms(logvars), !!!syms(predvars), starts_with("out"), d_hsSod_cat, d_dcSod_cat, num_dcVital)
 
-noimpvars <- names(edataforimp)[!names(edataforimp) %in% modvars]
+noimpvars <- names(edataforimp)[!names(edataforimp) %in% c(coxvars, logvars, predvars)]
 
 # Nelson-Aalen estimator
 na <- basehaz(coxph(Surv(outtime_hosphf, out_deathhf == 1) ~ 1,
@@ -55,3 +54,21 @@ imp <-
     )
   }
 stopImplicitCluster()
+
+
+# keep original imputed data (rsdataimp) just in case
+imp.org <- imp
+
+# Convert to Long
+long <- mice::complete(imp, action = "long", include = TRUE)
+
+long <- long %>%
+  mutate(
+    d_age_cat = factor(case_when(
+      num_age < 65 ~ 1,
+      num_age >= 65 ~ 2
+    ), levels = 1:2, labels = c("<65", ">=65"))
+  )
+
+# Convert back to mids object
+imp <- as.mids(long)

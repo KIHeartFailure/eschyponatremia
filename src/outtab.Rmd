@@ -56,7 +56,7 @@ survfunc <- function(time, event, eventname) {
   out[3, 2] <- "Adjusted HR (95% CI), p-value"
 
   amod <- with(imp, coxph(formula(paste0(
-    "Surv(", time, ",", event, " == 1) ~ relevel(natremia, ref = 'Normo/Normo') + ", paste(modvars, collapse = " + ")
+    "Surv(", time, ",", event, " == 1) ~ relevel(natremia, ref = 'Normo/Normo') + ", paste(coxvars, collapse = " + ")
   ))))
 
   ## df the number of events minus the regression coefficients.

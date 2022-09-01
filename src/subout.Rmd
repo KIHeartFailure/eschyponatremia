@@ -13,7 +13,7 @@ survsubfunc <- function(time, event, xvar, xvarname) {
     ## adjusted individual covariates
     amod <- with(imp, coxph(formula(paste0(
       "Surv(", time, ",", event, " == 1) ~ relevel(natremia, ref = 'Normo/Normo') + ",
-      paste(modvars, collapse = " + ")
+      paste(coxvars, collapse = " + ")
     ))))
 
     ## df the number of events minus the regression coefficients.
@@ -43,11 +43,11 @@ survsubfunc <- function(time, event, xvar, xvarname) {
     out[2:nrow(out), 1] <- rep(paste0("  ", levs), each = length(levsn) - 1)
 
     for (i in seq_along(levs)) {
-      xvaruse <- str_detect(modvars, xvar, negate = T)
+      xvaruse <- str_detect(coxvars, xvar, negate = T)
       ## adjusted individual covariates
       amod <- with(imp, coxph(formula(paste0(
         "Surv(", time, ",", event, " == 1) ~ relevel(natremia, ref = 'Normo/Normo') * relevel(", xvar, ", ref = '", levs[i], "') + ",
-        paste(modvars[xvaruse], collapse = " + ")
+        paste(coxvars[xvaruse], collapse = " + ")
       ))))
 
       ## df the number of events minus the regression coefficients.
@@ -71,7 +71,7 @@ survsubfunc <- function(time, event, xvar, xvarname) {
       if (i == 1) {
         amodnoint <- with(imp, coxph(formula(paste0(
           "Surv(", time, ",", event, " == 1) ~ relevel(natremia, ref = 'Normo/Normo') + relevel(", xvar, ", ref = '", levs[i], "') + ",
-          paste(modvars[modvars != xvar], collapse = " + ")
+          paste(coxvars[coxvars != xvar], collapse = " + ")
         ))))
 
         int <- D1(amod, amodnoint)
@@ -116,15 +116,15 @@ survsubfunc2 <- function(time2, event2) {
       xvarname = "LVEF (%)"
     )
   )
-  forestdata <- rbind(
-    forestdata,
-    survsubfunc(
-      time = time2,
-      event = event2,
-      xvar = "num_dmHyChol",
-      xvarname = "CKD"
-    )
-  )
+  #forestdata <- rbind(
+  #  forestdata,
+  #  survsubfunc(
+  #    time = time2,
+  #    event = event2,
+  #    xvar = "num_dmHyChol",
+  #    xvarname = "CKD"
+  #  )
+  #)
   forestdata <- rbind(
     forestdata,
     survsubfunc(

@@ -48,7 +48,9 @@ tab1func <- function(tabvars, tabname, data = edata) {
   # footnotes
   tab <- tab %>%
     mutate(
-      footnote1 = if_else(var_tmp %in% modvars, footnote_marker_symbol(1), "")
+      footnote1 = if_else(var_tmp %in% logvars, footnote_marker_number(1), ""),
+      footnote2 = if_else(var_tmp %in% coxvars, footnote_marker_number(2), ""),
+      footnote3 = if_else(var_tmp %in% predvars, footnote_marker_number(3), "")
     ) %>%
     unite(footnote, starts_with("footnote"), sep = "") %>%
     mutate(
@@ -76,7 +78,59 @@ tab1func <- function(tabvars, tabname, data = edata) {
     general = c(
       "Categorical variables are presented with n (%) and tested with chi-square test and continuous variables with median [q1-q3] and tested with Kruskal-Wallis test."
     ),
-    symbol = c("Included in imputation, logistic and cox regression models")
+    number = c(
+      "Included in models",
+      "Included in models",
+      "Included in models"
+    )
+  )
+}
+
+tab1meanfunc <- function(tabvars, tabname, data = edata) {
+  tab <- print(
+    CreateTableOne(
+      vars = tabvars,
+      data = data,
+      strata = "natremia"
+    ),
+    smd = FALSE,
+    missing = TRUE,
+    printToggle = FALSE,
+    test = TRUE,
+    catDigits = 1,
+    contDigits = 1,
+    explain = FALSE,
+    noSpaces = TRUE
+  )
+  tab <- as_tibble(cbind(var = rownames(tab), tab)) %>%
+    select(-test) %>%
+    select(var, Missing, everything())
+
+  # footnotes
+  tab <- tab %>%
+    mutate(
+      # so no probs
+      Variable = sanitize_text(var),
+      # space in Latex output (fix this other way?)
+      Variable = sub("  ", ". ", Variable)
+    ) %>%
+    select(Variable, Missing:p)
+
+  write.xlsx(tab, paste0("./output/tabs/", tabname, "_", Sys.Date(), ".xlsx"), rowNames = FALSE, overwrite = TRUE)
+
+  colnames(tab) <- sanitize_text(c(
+    "Variable", "Missing (%)", levels(edata %>% pull(natremia)), "p-value"
+  ))
+
+  footnote(
+    default_kable(tab,
+      font_size = 4,
+      caption = tabname,
+      longtable = TRUE,
+      escape = FALSE
+    ), # %>%
+    # landscape(),
+    general = "Continuous variables with mean [SD] and tested with ANOVA."
   )
 }
 ```
@@ -94,7 +148,7 @@ tab1func(
 ```{r tab1ex, cache=cacheon, dependson = "tab1"}
 tab1func(
   tabvars = tab1vars,
-  tabname = "Baseline characteristics - Long-term outcome population", 
+  tabname = "Baseline characteristics - Long-term outcome population",
   data = edata %>% filter(survpop)
 )
 ```
@@ -113,7 +167,24 @@ tab1func(
 ```{r tab2ex, cache=cacheon, dependson = "tab1"}
 tab1func(
   tabname = "Clinical course - Long-term outcome population",
-  tabvars = tab2vars, 
+  tabvars = tab2vars,
+  data = edata %>% filter(survpop)
+)
+```
+
+\clearpage
+
+```{r tabmean, cache=cacheon, dependson = "tab1"}
+tab1meanfunc(
+  tabname = "Clinical course - All - Mean variables",
+  tabvars = tabmeanvars
+)
+```
+
+```{r tabmeanex, cache=cacheon, dependson = "tab1"}
+tab1meanfunc(
+  tabname = "Clinical course - Long-term outcome population - Mean variables",
+  tabvars = tabmeanvars,
   data = edata %>% filter(survpop)
 )
 ```
