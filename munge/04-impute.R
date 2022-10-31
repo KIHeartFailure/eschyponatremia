@@ -3,7 +3,8 @@
 # Impute missing values ---------------------------------------------------
 
 edataforimp <- edata %>%
-  select(patientid, natremia, !!!syms(coxvars), !!!syms(logvars), !!!syms(predvars), starts_with("out"), d_hsSod_cat, d_dcSod_cat, num_dcVital)
+  select(patientid, natremia, !!!syms(coxvars), !!!syms(logvars), !!!syms(predvars), starts_with("out"), 
+         d_hsSod_cat, d_dcSod_cat, num_dcVital, d_lengtofstay_cat, d_dcNyha_cat, d_dcIccu_cat, d_change_weight_cat)
 
 noimpvars <- names(edataforimp)[!names(edataforimp) %in% c(coxvars, logvars, predvars)]
 

@@ -14,12 +14,12 @@ edata <- edata %>%
     d_age_cat = factor(case_when(
       num_age < 65 ~ 1,
       num_age >= 65 ~ 2
-    ), levels = 1:2, labels = c("<65", ">=65")), 
+    ), levels = 1:2, labels = c("<65", ">=65")),
     d_dmBmi_cat = factor(case_when(
       is.na(num_dmBmi) ~ NA_real_,
       num_dmBmi < 30 ~ 1,
       num_dmBmi >= 30 ~ 2
-    ), levels = 1:2, labels = c("<30", ">=30")), 
+    ), levels = 1:2, labels = c("<30", ">=30")),
     prev_mi_cabg_pci = factor(case_when(
       is.na(num_dmMi) | is.na(num_dmPci) | is.na(num_dmCabg) ~ NA_real_,
       num_dmMi == "Yes" | num_dmPci == "Yes" | num_dmCabg == "Yes" ~ 1,
@@ -156,7 +156,7 @@ edata <- edata %>%
       num_dmDev %in% c("No") ~ 1,
       num_dmDev %in% c("PM") ~ 2,
       num_dmDev %in% c("CRT-P", "CRT-D", "ICD") ~ 3
-    ),levels = 1:3, labels = c("No", "PM", "CRT/ICD")),
+    ), levels = 1:3, labels = c("No", "PM", "CRT/ICD")),
 
     # no of non-cardiac comorbs
     d_dmThy = case_when(
@@ -201,20 +201,40 @@ edata <- edata %>%
     d_bsa = sqrt(num_dmHeight * num_dmWeight / 3600),
     d_LAVI = num_dcLavol / d_bsa,
     d_change_weight = num_dcWeight - num_dmWeight,
+    d_change_weight_cat = factor(case_when(
+      is.na(d_change_weight) ~ NA_real_,
+      d_change_weight >= -2 ~ 1,
+      d_change_weight < -2 ~ 2
+    ), levels = 1:2, labels = c(">=-2kg", "<-2kg")),
     d_changepercent_weight = (num_dcWeight - num_dmWeight) / num_dmWeight * 100,
-    d_days_in_hosp = as.numeric(num_dcDischdt - num_dmVisitdt),
-    d_days_in_hosp_cat = factor(case_when(
-      d_days_in_hosp <= 7 ~ 1,
-      d_days_in_hosp > 7 ~ 2
-    ),
-    levels = 1:2,
-    labels = c("<= 7 days", ">7 days")
-    ),
+    d_residual_congestion = factor(case_when(
+      is.na(num_dcRal) |
+        is.na(num_dcJvp) |
+        is.na(num_dcEff) |
+        is.na(num_dcHep) |
+        is.na(num_dcOed) ~ NA_real_,
+      num_dcRal == "Yes" |
+        num_dcJvp == "Yes" |
+        num_dcEff == "Yes" |
+        num_dcHep == "Yes" |
+        num_dcOed == "Yes" ~ 1,
+      TRUE ~ 0
+    ), levels = 0:1, labels = c("No", "Yes")),
     d_numhsFacarrhythmic = factor(case_when(
       is.na(num_hsFacAf) | is.na(num_hsFacVa) ~ NA_real_,
       num_hsFacAf == "Yes" | num_hsFacVa == "Yes" ~ 1,
       TRUE ~ 0
     ), levels = 0:1, labels = c("No", "Yes")),
+    d_reasonforhosp = factor(case_when(
+      is.na(num_hsHf) | is.na(num_hsAcs) | is.na(num_hsFacMy) | is.na(num_hsFacNonc) | is.na(num_hsFacAf) |
+        is.na(num_hsFacVa) | is.na(num_hsFacInf) | is.na(num_hsFacUnh) | is.na(num_hsFacBrad) | is.na(num_hsFacRen) |
+        is.na(num_hsFacIat) | is.na(num_hsFacAne) | is.na(num_hsFacOt) ~ NA_real_,
+      num_hsAcs == "Yes" ~ 1,
+      num_hsFacAf == "Yes" ~ 2,
+      num_hsFacMy == "Yes" ~ 1,
+      TRUE ~ 3
+    ), levels = 1:3, labels = c("ACS/MI", "AF", "Other")),
+
     # medications
     d_loopDiurp = case_when(
       is.na(num_mdDiurp_c2) ~ NA_character_,
@@ -459,6 +479,19 @@ edata <- edata %>%
     levels = 0:1, labels = c("<=30", ">30")
     ),
 
+    # Outcomes in hospital
+    d_lengtofstay = num_dcDischdt - num_dmVisitdt,
+    d_lengtofstay_cat = factor(case_when(
+      is.na(d_lengtofstay) ~ NA_real_,
+      d_lengtofstay <= 7 ~ 1,
+      d_lengtofstay > 7 ~ 2
+    ), levels = 1:2, labels = c("<=7days", ">7days")),
+    d_dcIccu_cat = factor(case_when(
+      is.na(num_dcIccu) ~ NA_real_,
+      num_dcIccu <= 2 ~ 1,
+      num_dcIccu > 2 ~ 2
+    ), levels = 1:2, labels = c("<=2days", ">2days")),
+
     # Outcomes
     enddtm = coalesce(num_f1DeathDt, num_f1contDt),
     startdtm = coalesce(num_dcDischdt, num_dmVisitdt),
@@ -658,5 +691,5 @@ edata <- edata %>%
     num_mdAmid, num_mdACd,
     d_xanthined
   ) == "Yes")) %>%
-  mutate_if(is.character, as.factor) %>%
+  mutate(across(where(is.character), as.factor)) %>%
   select(-starts_with("tmp_"))

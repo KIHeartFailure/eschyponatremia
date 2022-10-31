@@ -98,8 +98,7 @@ to death or last follow-up were set to death or last follow-up.
 Missing data for the covariates included in the models was imputed with multiple 
 imputation using mice [@mice] for 10 datasets and 10 iterations. 
 Variables included in the imputation model are indicated with 1, 2 or 3 in Table \ref{tab:tab1all}-\ref{tab:tab2ex}. 
-The primary outcome, all-cause death or first re-hospitalization for HF at follow-up, was included as the Nelson-Aalen estimator. 
-Natremia was not included in the model.
+The primary outcome, all-cause death or first re-hospitalization for HF at follow-up, was included as the Nelson-Aalen estimator. But outcomes and natremia are not included in the model or imputed.
 
 \clearpage
 
@@ -151,6 +150,7 @@ residuals (cox.zph in [@survival-package]). => XXX
 
 Subgroup analysis are performed for selected variables
 using interaction effects on the long-term outcome population (patients with follow-up data). 
+The same variables as in the main models are adjusted for. 
 
 ```{r, child = "./src/subout.Rmd"}
 
@@ -171,7 +171,7 @@ Performed on all patients.
 
 ## Predictors
 
-Modelled using univariable logistic regression for the variables shown in Table \ref{tab:tab1all}-\ref{tab:tab2ex} 
+Modelled using multivariable logistic regression for the variables shown in Table \ref{tab:tab1all}-\ref{tab:tab2ex} 
 indicated with 1 (hyponatremia at hospital admission) and 3 (amelioration of hyponatremia). 
 Performed on all patients and, for the amelioration of hyponatremia, patients with discharge value of sodium. 
 

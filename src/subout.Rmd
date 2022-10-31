@@ -116,15 +116,15 @@ survsubfunc2 <- function(time2, event2) {
       xvarname = "LVEF (%)"
     )
   )
-  #forestdata <- rbind(
-  #  forestdata,
-  #  survsubfunc(
-  #    time = time2,
-  #    event = event2,
-  #    xvar = "num_dmHyChol",
-  #    xvarname = "CKD"
-  #  )
-  #)
+  forestdata <- rbind(
+    forestdata,
+    survsubfunc(
+      time = time2,
+      event = event2,
+      xvar = "d_dcCKDEPI_cat",
+      xvarname = "CKD-EPI (mL/min/1.73 m²)"
+    )
+  )
   forestdata <- rbind(
     forestdata,
     survsubfunc(
@@ -258,7 +258,7 @@ plotforest <- function(forestdata) {
 
   axis(2,
     at = nrow(g1) + 2,
-    labels = "HR (95% CI)",
+    labels = "Adjusted HR (95% CI)",
     cex.axis = cextext, tick = FALSE, las = 2, line = 10, hadj = 0.5, font = 2
   )
   axis(2,
@@ -315,7 +315,7 @@ plotforest <- function(forestdata) {
   )
   axis(1,
     at = (log(maxmy) + log(minmy)) / 2 + add1, cex.axis = cextext,
-    labels = "HR (95% CI)", line = 2, tick = FALSE
+    labels = "Adjusted HR (95% CI)", line = 2, tick = FALSE
   )
 }
 ```
@@ -323,7 +323,7 @@ plotforest <- function(forestdata) {
 ```{r outsubacdeathhfh, cache=cacheon, dependson="outsub"}
 deathachosphf <- survsubfunc2(
   time2 = "outtime_hosphf",
-  event2 = "out_hosphf"
+  event2 = "out_deathhosphf"
 )
 ```
 

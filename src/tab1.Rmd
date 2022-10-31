@@ -50,7 +50,7 @@ tab1func <- function(tabvars, tabname, data = edata) {
     mutate(
       footnote1 = if_else(var_tmp %in% logvars, footnote_marker_number(1), ""),
       footnote2 = if_else(var_tmp %in% coxvars, footnote_marker_number(2), ""),
-      footnote3 = if_else(var_tmp %in% predvars, footnote_marker_number(3), "")
+      footnote3 = if_else(var_tmp %in% predvarsmult, footnote_marker_number(3), "")
     ) %>%
     unite(footnote, starts_with("footnote"), sep = "") %>%
     mutate(
@@ -79,9 +79,9 @@ tab1func <- function(tabvars, tabname, data = edata) {
       "Categorical variables are presented with n (%) and tested with chi-square test and continuous variables with median [q1-q3] and tested with Kruskal-Wallis test."
     ),
     number = c(
-      "Included in models",
-      "Included in models",
-      "Included in models"
+      "Included in in-hospital outcome and prediction of hyponatremia models",
+      "Included in long-term outcome models",
+      "Included in prediction of no-improvment during hospitalization models"
     )
   )
 }

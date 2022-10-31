@@ -17,6 +17,7 @@ ProjectTemplate::cache("tabmeanvars")
 ProjectTemplate::cache("logvars")
 ProjectTemplate::cache("coxvars")
 ProjectTemplate::cache("predvars")
+ProjectTemplate::cache("predvarsmult")
 
 ProjectTemplate::cache("flow")
 ProjectTemplate::cache("edata")

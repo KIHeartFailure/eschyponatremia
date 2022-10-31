@@ -75,9 +75,24 @@ out2 <- outfunc(
   val = "Dead",
   eventname = "In-hospital death"
 )
+out3 <- outfunc(
+  event = "d_lengtofstay_cat",
+  val = ">7days",
+  eventname = "Lenght of hospital stay >7 days"
+)
+out4 <- outfunc(
+  event = "d_dcIccu_cat",
+  val = ">2days",
+  eventname = "Lenght of ICCU stay >2 days"
+)
+out5 <- outfunc(
+  event = "d_change_weight_cat",
+  val = "<-2kg",
+  eventname = "Weight reduction >2 kg"
+)
 
 outall <- rbind(
-  out1, out2
+  out1, out2, out3, out4, out5
 )
 
 write.xlsx(outall, paste0("./output/tabs/In-hospital outcomes by admisson Natremia_", Sys.Date(), ".xlsx"), rowNames = FALSE, overwrite = T)

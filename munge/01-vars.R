@@ -25,7 +25,7 @@ tab1vars <- c(
   "num_dmHT",
   "num_dmDis",
   "num_dmDepr",
-  "d_no_noncardiac_comorbs", 
+  "d_no_noncardiac_comorbs",
   "num_dmSmoking_c1",
 
   # Previous pharmacotherapy
@@ -33,12 +33,14 @@ tab1vars <- c(
   "d_loopDiurp",
   "d_loopDiurpdose_eqFurosemide",
   "d_loopDiurpdose_eqFurosemide40",
+  "d_loopDiurpmod",
   "d_thiazideDiurp",
   "d_thiazideDiurpdose_eqHydrochlorotiazide",
   "d_thiazideDiurpdose_eqHydrochlorotiazide25",
   "num_mdALp",
   "num_mdALpdo",
   "d_ALpdose_25",
+  "d_ALpmod",
   "d_arb_or_ace_or_arnip",
   "num_mdACEp",
   "num_mdATp",
@@ -67,6 +69,7 @@ tab1vars <- c(
   "num_hsRal",
   "d_X_pulmc_alvoedema",
   "num_hsOed",
+  "d_reasonforhosp",
   "num_hsHf",
   "d_numhsFacarrhythmic",
   "num_hsFacBrad",
@@ -84,7 +87,7 @@ tab1vars <- c(
   "num_hsTrop",
   "num_hsSod",
   "num_hsPot",
-  "num_hsGl", 
+  "num_hsGl",
   "num_hsCre",
   "d_hsCKDEPI",
   "d_hsCKDEPI_cat",
@@ -125,12 +128,14 @@ tab2vars <- c(
   "d_loopDiurh",
   "d_loopDiurhdose_eqFurosemide",
   "d_loopDiurhdose_eqFurosemide80",
+  "d_loopDiurhmod",
   "d_thiazideDiurh",
   "d_thiazideDiurhdose_eqHydrochlorotiazide",
   "d_thiazideDiurhdose_eqHydrochlorotiazide25",
   "num_mdALh",
   "num_mdALhdo",
   "d_ALhdose_25",
+  "d_ALhmod",
   "d_arb_or_ace_or_arnih",
   "num_mdACEh",
   "num_mdATh",
@@ -152,13 +157,21 @@ tab2vars <- c(
   "num_dcPci",
 
   # Clinical status at discharge
+  "num_dcVital",
+  "d_lengtofstay",
+  "d_lengtofstay_cat",
+  "num_dcIccu_c1",
+  "num_dcIccu",
+  "d_dcIccu_cat",
   "num_dcRal",
   "num_dcJvp",
   "num_dcEff",
   "num_dcHep",
   "num_dcOed",
+  "d_residual_congestion",
   "d_change_weight",
   "d_changepercent_weight",
+  "d_change_weight_cat",
   "d_dcNyha_cat",
   "improvment1class_dcNyha",
   "num_dcBpm",
@@ -202,6 +215,7 @@ tab2vars <- c(
   # Pharmacotherapy at hospital discharge
   "num_mdDiurd",
   "d_loopDiurd",
+  "d_loopDiurhmod",
   "d_loopDiurddose_eqFurosemide",
   "d_loopDiurddose_eqFurosemide40",
   "d_thiazideDiurd",
@@ -251,10 +265,11 @@ logvars <- c(
   "num_dmSmoking_c1",
 
   # Heart failure
-  "d_dcEf_cat",
+  "num_dcEf",
   "num_dcAorSte",
   "num_dcMitReg",
   "num_dcTriCus",
+  "d_reasonforhosp",
   "num_dcRyth",
 
   # Clinical and laboratory presentation at admission
@@ -268,7 +283,7 @@ logvars <- c(
   # Previous pharmacotherapy (before hospital admission)
   "d_thiazideDiurp",
   "d_loopDiurpmod",
-  "d_ALpmod",
+  "num_mdALp",
   "d_arb_or_ace_or_arnip",
   "num_mdBBp",
   "num_mdAmip",
@@ -293,13 +308,16 @@ coxvars <- c(
   "d_dmThy",
   "num_dmDis",
   "num_dmDepr",
+  # "dmHyChol",
+
   "num_dmSmoking_c1",
 
   # Heart failure
-  "d_dcEf_cat",
+  "num_dcEf",
   "num_dcAorSte",
   "num_dcMitReg",
   "num_dcTriCus",
+  "d_reasonforhosp",
   "num_dcRyth",
 
   # In-hospital course
@@ -307,11 +325,7 @@ coxvars <- c(
   "num_dcPci",
 
   # Clinical and laboratory presentation at discharge
-  "num_dcRal",
-  "num_dcJvp",
-  "num_dcEff",
-  "num_dcHep",
-  "num_dcOed",
+  "d_residual_congestion",
   "d_dcNyha_cat",
   "num_dcBpm",
   "num_dcBp1",
@@ -344,10 +358,11 @@ predvars <- c(
   "num_dmSmoking_c1",
 
   # Heart failure
-  "d_dcEf_cat",
+  "num_dcEf",
   "num_dcAorSte",
   "num_dcMitReg",
   "num_dcTriCus",
+  "d_reasonforhosp",
   "num_dcRyth",
 
   # Clinical and laboratory presentation at admission
@@ -366,11 +381,7 @@ predvars <- c(
   "d_changepercent_Bp1",
 
   # Clinical and laboratory presentation at discharge
-  "num_dcRal",
-  "num_dcJvp",
-  "num_dcEff",
-  "num_dcHep",
-  "num_dcOed",
+  "d_residual_congestion",
   "d_dcNyha_cat",
   "num_dcBnp",
   "num_dcBp1",
@@ -383,7 +394,6 @@ predvars <- c(
   "num_hsProDiu",
   "d_loopDiurhmod",
   "num_mdALh",
-  "d_ALhmod",
   "d_arb_or_ace_or_arnih",
   "num_mdBBh",
   "num_mdAmih",
@@ -392,4 +402,47 @@ predvars <- c(
   "num_mdCcbh",
   "num_mdAdeph",
   "d_xanthineh"
+)
+
+
+predvarsmult <- c(
+  # Clinical characteristics
+  "num_age",
+  "num_dmgender",
+  "num_dmBmi",
+  "num_dmEtio_c1",
+  "num_dmStroke",
+  "num_dmPvd",
+  "num_dmDiab_c1",
+  "num_dmCopd",
+  "num_dmHepa",
+  "d_dmThy",
+  "num_dmDis",
+  "num_dmDepr",
+  "num_dmSmoking_c1",
+
+  # Heart failure
+  "num_dcEf",
+  "d_reasonforhosp",
+  "num_dcRyth",
+
+  # In-hospital course
+  "num_hsIntr",
+  "d_changepercent_weight",
+
+  # Clinical and laboratory presentation at discharge
+  "d_residual_congestion",
+  "d_dcNyha_cat",
+  "num_dcBp1",
+  "d_dcCKDEPI",
+
+  # Pharmacotherapy during hospitalization
+  "d_thiazideDiurh",
+  "d_loopDiurhmod",
+  "num_mdALh",
+  "d_arb_or_ace_or_arnih",
+  "num_mdBBh",
+  "num_mdAmih",
+  "num_mdAntiarh",
+  "num_mdDigoh"
 )

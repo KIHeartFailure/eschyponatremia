@@ -32,9 +32,9 @@ default_kable(outor,
 
 ```{r preddischarge, cache=cacheon}
 
-impdata <- miceadds::subset_datlist(imp, subset = edata %>% filter(!is.na(d_dcSod_cat)) %>% pull(d_hsSod_cat) == "<135")
+impdata <- miceadds::subset_datlist(imp, subset = edata %>% mutate(koll = !is.na(d_dcSod_cat) & d_hsSod_cat == "<135") %>% pull(koll))
 
-ormod <- with(impdata, glm(formula(paste0("d_dcSod_cat == '>=135' ~ ", paste(predvars, collapse = " + "))),
+ormod <- with(impdata, glm(formula(paste0("d_dcSod_cat == '>=135' ~ ", paste(predvarsmult, collapse = " + "))),
   family = binomial(link = "logit")
 ))
 
