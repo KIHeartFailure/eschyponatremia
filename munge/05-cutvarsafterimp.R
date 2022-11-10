@@ -34,3 +34,5 @@ long <- long %>%
 # Convert back to Mids
 imput.short <- as.mids(long)
 imp <- imput.short
+
+impsurv <- miceadds::subset_datlist(imp, expr_subset = edata$survpop == T)

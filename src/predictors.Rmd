@@ -5,8 +5,12 @@ ormod <- with(imp, glm(formula(paste0("d_hsSod_cat == '<135' ~ ", paste(logvars,
 ))
 
 sormod <- summary(pool(ormod))
-
 nval <- length(sormod$term)
+
+units <- rep(1, nval - 1)
+units[sormod$term[2:nval] %in% c("num_age", "num_dmBpm", "num_dmBp1", "d_hsCKDEPI")] <- 10
+units[sormod$term[2:nval] %in% c("num_dmBmi", "num_dcEf")] <- 5
+
 outor <- data.frame(
   var = as.character(sormod$term[2:nval]),
   logor = sormod$estimate[2:nval],
@@ -14,10 +18,14 @@ outor <- data.frame(
   uci = sormod$estimate[2:nval] + global_z05 * sormod$std.error[2:nval],
   p = fn(sormod$p.value[2:nval], dig = 3, p = TRUE)
 ) %>%
-  mutate(orp = paste0(fn(exp(logor), 2), " (", fn(exp(lci), 2), "-", fn(exp(uci), 2), "), ", p)) %>%
+  mutate(orp = paste0(fn(exp(logor)^units, 2), " (", fn(exp(lci)^units, 2), "-", fn(exp(uci)^units, 2), "), ", p)) %>%
   # remove = Yes
-  mutate(Variable = str_replace(var, fixed("Yes"), "")) %>%
-  select(var, orp)
+  mutate(
+    Variable = str_replace(var, fixed("Yes"), ""),
+    Variable = paste0(Variable, " (units of ", units, ")"),
+    Variable = str_replace(Variable, fixed(" (units of 1)"), "")
+  ) %>%
+  select(Variable, orp)
 
 colnames(outor) <- c("Variable", "Odds Ratio (95% CI)")
 
@@ -32,15 +40,19 @@ default_kable(outor,
 
 ```{r preddischarge, cache=cacheon}
 
-impdata <- miceadds::subset_datlist(imp, subset = edata %>% mutate(koll = !is.na(d_dcSod_cat) & d_hsSod_cat == "<135") %>% pull(koll))
+impdata <- miceadds::subset_datlist(imp, expr_subset = edata %>% mutate(koll = d_hsSod_cat == "<135") %>% pull(koll))
 
 ormod <- with(impdata, glm(formula(paste0("d_dcSod_cat == '>=135' ~ ", paste(predvarsmult, collapse = " + "))),
   family = binomial(link = "logit")
 ))
 
 sormod <- summary(pool(ormod))
-
 nval <- length(sormod$term)
+
+units <- rep(1, nval - 1)
+units[sormod$term[2:nval] %in% c("num_age", "num_dcBp1", "d_dcCKDEPI")] <- 10
+units[sormod$term[2:nval] %in% c("num_dmBmi", "num_dcEf")] <- 5
+
 outor <- data.frame(
   var = as.character(sormod$term[2:nval]),
   logor = sormod$estimate[2:nval],
@@ -48,10 +60,14 @@ outor <- data.frame(
   uci = sormod$estimate[2:nval] + global_z05 * sormod$std.error[2:nval],
   p = fn(sormod$p.value[2:nval], dig = 3, p = TRUE)
 ) %>%
-  mutate(orp = paste0(fn(exp(logor), 2), " (", fn(exp(lci), 2), "-", fn(exp(uci), 2), "), ", p)) %>%
+  mutate(orp = paste0(fn(exp(logor)^units, 2), " (", fn(exp(lci)^units, 2), "-", fn(exp(uci)^units, 2), "), ", p)) %>%
   # remove = Yes
-  mutate(Variable = str_replace(var, fixed("Yes"), "")) %>%
-  select(var, orp)
+  mutate(
+    Variable = str_replace(var, fixed("Yes"), ""),
+    Variable = paste0(Variable, " (units of ", units, ")"),
+    Variable = str_replace(Variable, fixed(" (units of 1)"), "")
+  ) %>%
+  select(Variable, orp)
 
 colnames(outor) <- c("Variable", "Odds Ratio (95% CI)")
 

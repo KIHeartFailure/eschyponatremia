@@ -55,21 +55,3 @@ imp <-
     )
   }
 stopImplicitCluster()
-
-
-# keep original imputed data (rsdataimp) just in case
-imp.org <- imp
-
-# Convert to Long
-long <- mice::complete(imp, action = "long", include = TRUE)
-
-long <- long %>%
-  mutate(
-    d_age_cat = factor(case_when(
-      num_age < 65 ~ 1,
-      num_age >= 65 ~ 2
-    ), levels = 1:2, labels = c("<65", ">=65"))
-  )
-
-# Convert back to mids object
-imp <- as.mids(long)

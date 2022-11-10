@@ -462,15 +462,11 @@ edata <- edata %>%
       num_mdcopdd_c2 == "Xanthine agents" ~ 1,
       TRUE ~ 0
     ), levels = 0:1, labels = c("No", "Yes")),
-    d_change_f1Nt = num_f1Nt - num_hsNt,
-    d_changepercent_f1Nt = (num_f1Nt - num_hsNt) / num_hsNt * 100,
-    d_change_f1Bnp = num_f1Bnp - num_hsBnp,
-    d_changepercent_f1Bnp = (num_f1Bnp - num_hsBnp) / num_hsBnp * 100,
     d_change_dcNt = num_dcNt - num_hsNt,
     d_changepercent_dcNt = (num_dcNt - num_hsNt) / num_hsNt * 100,
     d_change_dcBnp = num_dcBnp - num_hsBnp,
     d_changepercent_dcBnp = (num_dcBnp - num_hsBnp) / num_hsBnp * 100,
-    tmpbothntbnp <- coalesce(d_changepercent_dcNt, d_change_dcBnp),
+    tmpbothntbnp = coalesce(d_changepercent_dcNt, d_change_dcBnp),
     d_changepercent_either_dcNtBnp = factor(case_when(
       is.na(tmpbothntbnp) ~ NA_real_,
       tmpbothntbnp <= 30 ~ 0,
@@ -643,21 +639,7 @@ edata <- edata %>%
     # all-cause death or hf hosp
     out_deathhosphf = ifelse(out_hosphf == 1, 1, out_death),
     # cv death or hf hosp
-    out_deathcvhosphf = ifelse(out_hosphf == 1, 1, out_deathcv),
-
-    # competing risk outcomes
-    out_deathcv_cr = if_else(out_deathcv == 0 & out_death == 1, 2, out_deathcv),
-    out_deathcv_exclhf_cr = if_else(out_deathcv_exclhf == 0 & out_death == 1, 2, out_deathcv_exclhf),
-    out_deathnoncv_cr = if_else(out_deathnoncv == 0 & out_death == 1, 2, out_deathnoncv),
-    out_deathhf_cr = if_else(out_deathhf == 0 & out_death == 1, 2, out_deathhf),
-    out_deathscd_cr = if_else(out_deathscd == 0 & out_death == 1, 2, out_deathscd),
-    out_deathunknown_cr = if_else(out_deathunknown == 0 & out_death == 1, 2, out_deathunknown),
-    out_hosp_cr = if_else(out_hosp == 0 & out_death == 1, 2, out_hosp),
-    out_hospcv_cr = if_else(out_hospcv == 0 & out_death == 1, 2, out_hospcv),
-    out_hospcv_exclhf_cr = if_else(out_hospcv_exclhf == 0 & out_death == 1, 2, out_hospcv_exclhf),
-    out_hospnoncv_cr = if_else(out_hospnoncv == 0 & out_death == 1, 2, out_hospnoncv),
-    out_hosphf_cr = if_else(out_hosphf == 0 & out_death == 1, 2, out_hosphf),
-    out_deathcvhosphf_cr = if_else(out_deathcvhosphf == 0 & out_death == 1, 2, out_deathcvhosphf)
+    out_deathcvhosphf = ifelse(out_hosphf == 1, 1, out_deathcv)
   ) %>%
   mutate(d_no_noncardiac_comorbs = rowSums(select(
     ., num_dmStroke, num_dmPvd, num_dmVte, num_dmDiab_c1,
@@ -693,3 +675,15 @@ edata <- edata %>%
   ) == "Yes")) %>%
   mutate(across(where(is.character), as.factor)) %>%
   select(-starts_with("tmp_"))
+
+# Outliers
+
+edata <- edata %>%
+  mutate(
+    num_dcHb = ifelse(num_dcHb > 25, NA, num_dcHb),
+    d_dcCKDEPI = ifelse(d_dcCKDEPI > 300, NA, d_dcCKDEPI),
+    num_dcPot = ifelse(num_dcPot > 40, NA, num_dcPot),
+    num_dmBmi = ifelse(num_dmBmi > 80, NA, num_dmBmi),
+    num_hsHb = ifelse(num_hsHb > 25, NA, num_hsHb),
+    d_changepercent_weight = ifelse(d_changepercent_weight > 100, NA, d_changepercent_weight)
+  )

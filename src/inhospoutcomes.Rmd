@@ -32,7 +32,6 @@ outfunc <- function(event, val, eventname) {
   ormod <- with(imp, glm(formula(paste0(event, "=='", val, "' ~ relevel(d_hsSod_cat, ref = '>=135')")),
     family = binomial(link = "logit")
   ))
-  ormodtest <- glm(formula(paste0(event, "=='", val, "' ~ relevel(d_hsSod_cat, ref = '>=135')")), data = edata %>% filter(survpop))
 
   sormod <- summary(pool(ormod))
 

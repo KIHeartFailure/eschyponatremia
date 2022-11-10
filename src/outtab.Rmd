@@ -55,7 +55,7 @@ survfunc <- function(time, event, eventname) {
 
   out[3, 2] <- "Adjusted HR (95% CI), p-value"
 
-  amod <- with(imp, coxph(formula(paste0(
+  amod <- with(impsurv, coxph(formula(paste0(
     "Surv(", time, ",", event, " == 1) ~ relevel(natremia, ref = 'Normo/Normo') + ", paste(coxvars, collapse = " + ")
   ))))
 

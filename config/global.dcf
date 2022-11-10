@@ -10,7 +10,7 @@ logging_level: INFO
 load_libraries: TRUE
 libraries: purrr, dplyr, tidyr, tibble, stringr, lubridate, kableExtra, tableone, 
               openxlsx, survival, haven, epitools, hfmisc,
-              mice, parallel, doParallel, foreach, miceadds,
+              mice, parallel, doParallel, foreach, miceadds, splines, 
               plotrix, EValue
 as_factors: FALSE
 tables_type: tibble
