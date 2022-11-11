@@ -11,7 +11,7 @@ survsubfunc <- function(time, event, xvar, xvarname, nomodvar = xvar) {
     out[1:3, 2] <- levsn[1:3]
 
     ## adjusted individual covariates
-    amod <- with(impsurv, coxph(formula(paste0(
+    amod <- with(imp, coxph(formula(paste0(
       "Surv(", time, ",", event, " == 1) ~ relevel(natremia, ref = 'Normo/Normo') + ",
       paste(coxvars, collapse = " + ")
     ))))
@@ -46,7 +46,7 @@ survsubfunc <- function(time, event, xvar, xvarname, nomodvar = xvar) {
     
     for (i in seq_along(levs)) {
       ## adjusted individual covariates
-      amod <- with(impsurv, coxph(formula(paste0(
+      amod <- with(imp, coxph(formula(paste0(
         "Surv(", time, ",", event, " == 1) ~ relevel(natremia, ref = 'Normo/Normo') * relevel(",
         xvar, ", ref = '", levs[i], "') + ",
         paste(coxvaruse, collapse = " + ")
@@ -70,7 +70,7 @@ survsubfunc <- function(time, event, xvar, xvarname, nomodvar = xvar) {
       out[((i - 1) * 2 + i + 1):((i - 1) * 2 + i + 3), 7] <- asmod$estimate[1:3] + global_z05 * asmod$std.error[1:3]
 
       if (i == 1) {
-        amodnoint <- with(impsurv, coxph(formula(paste0(
+        amodnoint <- with(imp, coxph(formula(paste0(
           "Surv(", time, ",", event, " == 1) ~ relevel(natremia, ref = 'Normo/Normo') + relevel(", 
           xvar, ", ref = '", levs[i], "') + ",
           paste(coxvaruse, collapse = " + ")

@@ -492,7 +492,10 @@ edata <- edata %>%
     enddtm = coalesce(num_f1DeathDt, num_f1contDt),
     startdtm = coalesce(num_dcDischdt, num_dmVisitdt),
     outtime_death = as.numeric(enddtm - startdtm),
+    outtime_death = ifelse(!survpop, NA, outtime_death), 
+    
     out_death = case_when(
+      !survpop ~ NA_real_, 
       num_f1vital == "Alive" ~ 0,
       num_f1vital == "Dead" ~ 1
     ),
@@ -532,7 +535,7 @@ edata <- edata %>%
 
     # All-cause hosp
     out_hosp = case_when(
-      num_f1lost != "No" ~ NA_real_,
+      num_f1lost != "No" | !survpop ~ NA_real_,
       num_f1hosp1 == "Yes" |
         num_f1hosp2 == "Yes" |
         num_f1hosp3 == "Yes" |
@@ -551,10 +554,11 @@ edata <- edata %>%
     ),
     outtime_hosp = ifelse(out_hosp == 1 & is.na(outtime_hosp), outtime_death / 2, outtime_hosp),
     outtime_hosp = pmin(outtime_hosp, outtime_death, na.rm = TRUE),
+    outtime_hosp = ifelse(!survpop, NA, outtime_hosp),
 
     # CV
     out_hospcv = case_when(
-      num_f1lost != "No" ~ NA_real_,
+      num_f1lost != "No" | !survpop ~ NA_real_,
       num_f1hosp1cs %in% c("Cardiac, non HF", "HF", "Vascular") |
         num_f1hosp2cs %in% c("Cardiac, non HF", "HF", "Vascular") |
         num_f1hosp3cs %in% c("Cardiac, non HF", "HF", "Vascular") |
@@ -572,10 +576,11 @@ edata <- edata %>%
     outtime_hospcv = as.numeric(out_hospcvdtm - startdtm),
     outtime_hospcv = ifelse(out_hospcv == 1 & is.na(outtime_hospcv), outtime_death / 2, outtime_hospcv),
     outtime_hospcv = pmin(outtime_hospcv, outtime_death, na.rm = TRUE),
-
+    outtime_hospcv = ifelse(!survpop, NA, outtime_hospcv),
+    
     # CV excl HF
     out_hospcv_exclhf = case_when(
-      num_f1lost != "No" ~ NA_real_,
+      num_f1lost != "No" | !survpop ~ NA_real_,
       num_f1hosp1cs %in% c("Cardiac, non HF", "Vascular") |
         num_f1hosp2cs %in% c("Cardiac, non HF", "Vascular") |
         num_f1hosp3cs %in% c("Cardiac, non HF", "Vascular") |
@@ -593,10 +598,11 @@ edata <- edata %>%
     outtime_hospcv_exclhf = as.numeric(out_hospcv_exclhfdtm - startdtm),
     outtime_hospcv_exclhf = ifelse(out_hospcv_exclhf == 1 & is.na(outtime_hospcv_exclhf), outtime_death / 2, outtime_hospcv_exclhf),
     outtime_hospcv_exclhf = pmin(outtime_hospcv_exclhf, outtime_death, na.rm = TRUE),
+    outtime_hospcv_exclhf = ifelse(!survpop, NA, outtime_hospcv_exclhf),
 
     # HF hosp
     out_hosphf = case_when(
-      num_f1lost != "No" ~ NA_real_,
+      num_f1lost != "No" | !survpop ~ NA_real_,
       num_f1hosp1cs == "HF" |
         num_f1hosp2cs == "HF" |
         num_f1hosp3cs == "HF" |
@@ -614,10 +620,11 @@ edata <- edata %>%
     outtime_hosphf = as.numeric(out_hosphfdtm - startdtm),
     outtime_hosphf = ifelse(out_hosphf == 1 & is.na(outtime_hosphf), outtime_death / 2, outtime_hosphf),
     outtime_hosphf = pmin(outtime_hosphf, outtime_death, na.rm = TRUE),
+    outtime_hosphf = ifelse(!survpop, NA, outtime_hosphf),
 
     # Non-CV
     out_hospnoncv = case_when(
-      num_f1lost != "No" ~ NA_real_,
+      num_f1lost != "No" | !survpop ~ NA_real_,
       num_f1hosp1cs %in% c("Non CV", "Renal dysfunction") |
         num_f1hosp2cs %in% c("Non CV", "Renal dysfunction") |
         num_f1hosp3cs %in% c("Non CV", "Renal dysfunction") |
@@ -635,7 +642,8 @@ edata <- edata %>%
     outtime_hospnoncv = as.numeric(out_hospnoncvdtm - startdtm),
     outtime_hospnoncv = ifelse(out_hospnoncv == 1 & is.na(outtime_hospnoncv), outtime_death / 2, outtime_hospnoncv),
     outtime_hospnoncv = pmin(outtime_hospnoncv, outtime_death, na.rm = TRUE),
-
+    outtime_hospnoncv = ifelse(!survpop, NA, outtime_hospnoncv),
+    
     # all-cause death or hf hosp
     out_deathhosphf = ifelse(out_hosphf == 1, 1, out_death),
     # cv death or hf hosp
