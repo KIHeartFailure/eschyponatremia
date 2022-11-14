@@ -126,7 +126,7 @@ survsubfunc2 <- function(time2, event2) {
       time = time2,
       event = event2,
       xvar = "d_dcCKDEPI_cat",
-      xvarname = "CKD-EPI (mL/min/1.73 m²)", 
+      xvarname = "eGFR (mL/min/1.73 m²)", 
       nomodvar = "d_dcCKDEPI"
     )
   )

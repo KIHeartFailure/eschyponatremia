@@ -136,6 +136,10 @@ The median (q1-q3) follow-up for the long-term outcomes is
 
 ```
 
+```{r, child = "./src/forestoutcomes.Rmd"}
+
+```
+
 ### Assumptions
 
 The proportional hazards assumption was investigated using the scaled Schoenfeld 

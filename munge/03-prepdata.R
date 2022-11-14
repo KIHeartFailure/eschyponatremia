@@ -230,7 +230,7 @@ edata <- edata %>%
         is.na(num_hsFacVa) | is.na(num_hsFacInf) | is.na(num_hsFacUnh) | is.na(num_hsFacBrad) | is.na(num_hsFacRen) |
         is.na(num_hsFacIat) | is.na(num_hsFacAne) | is.na(num_hsFacOt) ~ NA_real_,
       num_hsAcs == "Yes" ~ 1,
-      num_hsFacAf == "Yes" ~ 2,
+      num_hsFacAf == "Yes" | num_hsFacVa == "Yes" ~ 2,
       num_hsFacMy == "Yes" ~ 1,
       TRUE ~ 3
     ), levels = 1:3, labels = c("ACS/MI", "AF", "Other")),
