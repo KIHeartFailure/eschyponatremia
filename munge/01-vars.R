@@ -342,70 +342,6 @@ coxvars <- c(
   "num_mdAmid"
 )
 
-predvars <- c(
-  # Clinical characteristics
-  "num_age",
-  "num_dmgender",
-  "num_dmBmi",
-  "num_dmEtio_c1",
-  "num_dmStroke",
-  "num_dmPvd",
-  "num_dmDiab_c1",
-  "num_dmCopd",
-  "num_dmHepa",
-  "d_dmThy",
-  "num_dmDis",
-  "num_dmDepr",
-  "num_dmSmoking_c1",
-
-  # Heart failure
-  "num_dcEf",
-  "num_dcAorSte",
-  "num_dcMitReg",
-  "num_dcTriCus",
-  "d_reasonforhosp",
-  "num_dcRyth",
-
-  # Clinical and laboratory presentation at admission
-  "d_hsNyha_cat",
-  "num_dmBpm",
-  "num_dmBp1",
-  "d_hsCKDEPI",
-  "num_hsPot",
-  "num_hsHb",
-
-  # In-hospital course
-  "num_hsIntr",
-  "num_dcPci",
-  "d_changepercent_weight",
-  "improvment1class_dcNyha",
-  "d_changepercent_Bp1",
-
-  # Clinical and laboratory presentation at discharge
-  "d_residual_congestion",
-  "d_dcNyha_cat",
-  "num_dcBnp",
-  "num_dcBp1",
-  "d_dcCKDEPI",
-  "num_dcPot",
-  "num_dcHb",
-
-  # Pharmacotherapy during hospitalization
-  "d_thiazideDiurh",
-  "num_hsProDiu",
-  "d_loopDiurhmod",
-  "num_mdALh",
-  "d_arb_or_ace_or_arnih",
-  "num_mdBBh",
-  "num_mdAmih",
-  "num_mdAntiarh",
-  "num_mdDigoh",
-  "num_mdCcbh",
-  "num_mdAdeph",
-  "d_xanthineh"
-)
-
-
 predvarsmult <- c(
   # Clinical characteristics
   "num_age",
@@ -435,7 +371,7 @@ predvarsmult <- c(
   "d_residual_congestion",
   "d_dcNyha_cat",
   "num_dcBp1",
-  "d_dcCKDEPI",
+  "d_changepercent_CKDEPI",
 
   # Pharmacotherapy during hospitalization
   "d_thiazideDiurh",
