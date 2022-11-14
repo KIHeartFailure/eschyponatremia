@@ -75,7 +75,7 @@ minmy <- round(exp(min(forestdata$lci, na.rm = T)), 1)
 maxmy <- round(exp(max(forestdata$uci, na.rm = T)), 1)
 
 # c(bottom, left, top, right)
-par(mar = c(4, 24, 0, 0) + 0.2)
+par(mar = c(3, 24, 0, 0) + 0.2)
 
 plotCI(
   x = forestdata$loghr, y = forestdata$order,
@@ -136,6 +136,6 @@ axis(2,
 
 axis(1,
   at = (log(maxmy) + log(minmy)) / 2, cex.axis = cextext,
-  labels = "Adjusted HR (95% CI)", line = 2, tick = FALSE
+  labels = "Adjusted HR (95% CI)", line = 1, tick = FALSE
 )
 ```
