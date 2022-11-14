@@ -481,7 +481,7 @@ edata <- edata %>%
     ),
 
     # Outcomes in hospital
-    d_lengtofstay = num_dcDischdt - num_dmVisitdt,
+    d_lengtofstay = as.numeric(num_dcDischdt - num_dmVisitdt),
     d_lengtofstay_cat = factor(case_when(
       is.na(d_lengtofstay) ~ NA_real_,
       d_lengtofstay <= 7 ~ 1,
