@@ -72,6 +72,7 @@ tab1vars <- c(
   "d_reasonforhosp",
   "num_hsHf",
   "d_numhsFacarrhythmic",
+  "d_numhsFacacsmi",
   "num_hsFacBrad",
   "num_hsFacMy",
   "num_hsFacUnh",

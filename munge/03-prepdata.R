@@ -225,6 +225,11 @@ edata <- edata %>%
       num_hsFacAf == "Yes" | num_hsFacVa == "Yes" ~ 1,
       TRUE ~ 0
     ), levels = 0:1, labels = c("No", "Yes")),
+    d_numhsFacacsmi = factor(case_when(
+      is.na(num_hsAcs) | is.na(num_hsFacMy) ~ NA_real_,
+      num_hsAcs == "Yes" | num_hsFacMy == "Yes" ~ 1,
+      TRUE ~ 0
+    ), levels = 0:1, labels = c("No", "Yes")),
     d_reasonforhosp = factor(case_when(
       is.na(num_hsHf) | is.na(num_hsAcs) | is.na(num_hsFacMy) | is.na(num_hsFacNonc) | is.na(num_hsFacAf) |
         is.na(num_hsFacVa) | is.na(num_hsFacInf) | is.na(num_hsFacUnh) | is.na(num_hsFacBrad) | is.na(num_hsFacRen) |
