@@ -8,7 +8,7 @@ dataass <- mice::complete(imp, 6)
 
 # check assumptions for cox models ----------------------------------------
 
-mod <- coxph(formula(paste0("Surv(outtime_hosphf, out_deathhosphf == 1) ~ relevel(natremia, ref = 'Normo/Normo') + ", 
+mod <- coxph(formula(paste0("Surv(outtime_hosphf, out_deathhosphf == 1) ~ relevel(natremia, ref = 'No/No') + ", 
                             paste0(coxvars, collapse = "+"))),
   data = dataass
 )
@@ -19,7 +19,7 @@ print(sig <- testpat$table[testpat$table[, 3] < 0.05, ])
 x11()
 plot(testpat[1], resid = F, ylim = c(-4, 4))
 
-mod <- coxph(Surv(outtime_hosphf, out_deathhosphf == 1) ~ relevel(natremia, ref = 'Normo/Normo') + 
+mod <- coxph(Surv(outtime_hosphf, out_deathhosphf == 1) ~ relevel(natremia, ref = 'No/No') + 
                ns(num_age, 4) + num_dmgender + ns(num_dmBmi, 4) + num_dmEtio_c1 +
                num_dmStroke + num_dmPvd + num_dmDiab_c1 + num_dmCopd + num_dmHepa + 
                d_dmThy + num_dmDis + num_dmDepr + num_dmSmoking_c1 + ns(num_dcEf, 4) + 

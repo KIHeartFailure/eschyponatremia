@@ -7,7 +7,7 @@ kmfunc <- function(time, event, eventname, ymax = 1) {
 
   # cox model
   amod <- with(imp, coxph(formula(paste0(
-    "Surv(", time, ",", event, " == 1) ~ relevel(natremia, ref = 'Normo/Normo') + ",
+    "Surv(", time, ",", event, " == 1) ~ relevel(natremia, ref = 'No/No') + ",
     paste(coxvars, collapse = " + ")
   ))))
 
@@ -27,7 +27,7 @@ kmfunc <- function(time, event, eventname, ymax = 1) {
 
   # c(bottom, left, top, right)
   cexmy <- 1.2
-  par(mar = c(8.5, 7.6, 1, 1.5) + 0.1)
+  par(mar = c(8.5, 6.6, 1, 1.5) + 0.1)
 
   plots <- plot(fits,
     fun = "event",
@@ -65,7 +65,7 @@ kmfunc <- function(time, event, eventname, ymax = 1) {
   # text(ylabs$ypos[2] + yposplus[2], x = 9 * 30, ylabs$ytext[2], pos = 2, cex = cexmy)
 
   # texthr <- paste0(levs, " ", c(hrprint, "ref"))
-  legend(x = 5.5 * 30, y = ymax + 0.05, c("Adjusted HR (95% CI), p-value", hrprint, "ref"), cex = cexmy, adj = 0.5, bty = "n")
+  legend(x = 4.5 * 30, y = ymax + 0.05, c("Adjusted HR (95% CI), p-value", hrprint, "ref"), cex = cexmy, adj = 0.5, bty = "n")
   legend(
     x = 0.5, y = ymax + 0.05, bty = "n", c("", levs), lty = 1,
     col = c("white", global_cols[c(2, 4, 6, 8)]), cex = cexmy, lwd = 4,
@@ -73,11 +73,11 @@ kmfunc <- function(time, event, eventname, ymax = 1) {
   )
   # text(y = 0.28, x = 4 * 30, "Adjusted HR (95% CI), p-value", cex = cexmy, adj = 0.5)
 
-  mtext("No. at risk", side = 1, line = 3.7, at = -90, adj = 0, cex = cexmy, font = 2)
-  mtext(levs[1], side = 1, line = 4.7, at = -90, adj = 0, cex = cexmy, col = global_cols[2])
-  mtext(levs[2], side = 1, line = 5.7, at = -90, adj = 0, cex = cexmy, col = global_cols[4])
-  mtext(levs[3], side = 1, line = 6.7, at = -90, adj = 0, cex = cexmy, col = global_cols[6])
-  mtext(levs[4], side = 1, line = 7.7, at = -90, adj = 0, cex = cexmy, col = global_cols[8])
+  mtext("No. at risk", side = 1, line = 3.7, at = -70, adj = 0, cex = cexmy, font = 2)
+  mtext(levs[1], side = 1, line = 4.7, at = -70, adj = 0, cex = cexmy, col = global_cols[2])
+  mtext(levs[2], side = 1, line = 5.7, at = -70, adj = 0, cex = cexmy, col = global_cols[4])
+  mtext(levs[3], side = 1, line = 6.7, at = -70, adj = 0, cex = cexmy, col = global_cols[6])
+  mtext(levs[4], side = 1, line = 7.7, at = -70, adj = 0, cex = cexmy, col = global_cols[8])
 
   nrisk <- summary(fits, seq(0, 12, 2) * 30, extend = T)
 

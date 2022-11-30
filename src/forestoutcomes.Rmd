@@ -10,7 +10,7 @@ survforestfunc <- function(time, event, eventname) {
   ## adjusted individual covariates
 
   amod <- with(imp, coxph(formula(paste0(
-    "Surv(", time, ",", event, " == 1) ~ relevel(natremia, ref = 'Normo/Normo') + ", paste(coxvars, collapse = " + ")
+    "Surv(", time, ",", event, " == 1) ~ relevel(natremia, ref = 'No/No') + ", paste(coxvars, collapse = " + ")
   ))))
 
   ## df the number of events minus the regression coefficients.
@@ -88,7 +88,7 @@ plotCI(
     log(maxmy)
   ),
   xlab = NA,
-  ylim = c(1, nrow(forestdata) + 1),
+  ylim = c(1, nrow(forestdata) + 2),
   axes = FALSE,
   ylab = NA,
   main = NA,
@@ -117,14 +117,24 @@ axis(2,
 )
 
 axis(2,
+  at = nrow(forestdata) + 1,
+  labels = "Hyponatremia",
+  cex.axis = cextext, tick = FALSE, las = 2, line = 13.5, hadj = 0, font = 2
+)
+axis(2,
   at = forestdata$order,
   labels = forestdata$natremia,
   cex.axis = cextext, tick = FALSE, las = 2, line = 13.5, hadj = 0
 )
 
 axis(2,
+  at = nrow(forestdata) + 2,
+  labels = "Adjusted",
+  cex.axis = cextext, tick = FALSE, las = 2, line = 3, hadj = 0.5, font = 2
+)
+axis(2,
   at = nrow(forestdata) + 1,
-  labels = "Adjusted HR (95% CI), p-value",
+  labels = "HR (95% CI), p-value",
   cex.axis = cextext, tick = FALSE, las = 2, line = 3, hadj = 0.5, font = 2
 )
 

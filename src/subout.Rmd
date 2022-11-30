@@ -12,7 +12,7 @@ survsubfunc <- function(time, event, xvar, xvarname, nomodvar = xvar) {
 
     ## adjusted individual covariates
     amod <- with(imp, coxph(formula(paste0(
-      "Surv(", time, ",", event, " == 1) ~ relevel(natremia, ref = 'Normo/Normo') + ",
+      "Surv(", time, ",", event, " == 1) ~ relevel(natremia, ref = 'No/No') + ",
       paste(coxvars, collapse = " + ")
     ))))
 
@@ -47,7 +47,7 @@ survsubfunc <- function(time, event, xvar, xvarname, nomodvar = xvar) {
     for (i in seq_along(levs)) {
       ## adjusted individual covariates
       amod <- with(imp, coxph(formula(paste0(
-        "Surv(", time, ",", event, " == 1) ~ relevel(natremia, ref = 'Normo/Normo') * relevel(",
+        "Surv(", time, ",", event, " == 1) ~ relevel(natremia, ref = 'No/No') * relevel(",
         xvar, ", ref = '", levs[i], "') + ",
         paste(coxvaruse, collapse = " + ")
       ))))
@@ -71,7 +71,7 @@ survsubfunc <- function(time, event, xvar, xvarname, nomodvar = xvar) {
 
       if (i == 1) {
         amodnoint <- with(imp, coxph(formula(paste0(
-          "Surv(", time, ",", event, " == 1) ~ relevel(natremia, ref = 'Normo/Normo') + relevel(", 
+          "Surv(", time, ",", event, " == 1) ~ relevel(natremia, ref = 'No/No') + relevel(", 
           xvar, ", ref = '", levs[i], "') + ",
           paste(coxvaruse, collapse = " + ")
         ))))
@@ -155,9 +155,9 @@ plotforest <- function(forestdata) {
   minmy <- round(exp(min(forestdata$lci, na.rm = T)), 1)
   maxmy <- round(exp(max(forestdata$uci, na.rm = T)), 1)
 
-  g1 <- rev(forestdata %>% filter(is.na(Natremia) | Natremia == "Hypo/Hypo"))
-  g2 <- rev(forestdata %>% filter(is.na(Natremia) | Natremia == "Hypo/Normo"))
-  g3 <- rev(forestdata %>% filter(is.na(Natremia) | Natremia == "Normo/Hypo"))
+  g1 <- rev(forestdata %>% filter(is.na(Natremia) | Natremia == "Yes/Yes"))
+  g2 <- rev(forestdata %>% filter(is.na(Natremia) | Natremia == "Yes/No"))
+  g3 <- rev(forestdata %>% filter(is.na(Natremia) | Natremia == "No/Yes"))
 
   # c(bottom, left, top, right)
   par(mar = c(4, 28, 0, 3.5) + 0.2)
@@ -250,7 +250,7 @@ plotforest <- function(forestdata) {
 
   axis(2,
     at = nrow(g1) + 1,
-    labels = "Hypo/Hypo",
+    labels = "Yes/Yes",
     cex.axis = cextext, tick = FALSE, las = 2, line = 18, hadj = 0.5, font = 2,
     col.axis = global_cols[2]
   )
@@ -268,7 +268,7 @@ plotforest <- function(forestdata) {
   )
   axis(2,
     at = nrow(g1) + 1,
-    labels = "Hypo/Normo",
+    labels = "Yes/No",
     cex.axis = cextext, tick = FALSE, las = 2, line = 10, hadj = 0.5, font = 2,
     col.axis = global_cols[4]
   )
@@ -281,7 +281,7 @@ plotforest <- function(forestdata) {
 
   axis(2,
     at = nrow(g1) + 1,
-    labels = "Normo/Hypo",
+    labels = "No/Yes",
     cex.axis = cextext, tick = FALSE, las = 2, line = 2, hadj = 0.5, font = 2,
     col.axis = global_cols[6]
   )
@@ -305,17 +305,17 @@ plotforest <- function(forestdata) {
 
   axis(1,
     at = (log(maxmy) + log(minmy)) / 2, cex.axis = cextext,
-    labels = "Hypo/Hypo", line = 1, tick = FALSE,
+    labels = "Yes/Yes", line = 1, tick = FALSE,
     col.axis = global_cols[2]
   )
   axis(1,
     at = (log(maxmy) + log(minmy)) / 2 + add1, cex.axis = cextext,
-    labels = "Hypo/Normo", line = 1, tick = FALSE,
+    labels = "Yes/No", line = 1, tick = FALSE,
     col.axis = global_cols[4]
   )
   axis(1,
     at = (log(maxmy) + log(minmy)) / 2 + add2, cex.axis = cextext,
-    labels = "Normo/Hypo", line = 1, tick = FALSE,
+    labels = "No/Yes", line = 1, tick = FALSE,
     col.axis = global_cols[6]
   )
   axis(1,

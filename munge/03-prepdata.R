@@ -70,7 +70,7 @@ edata <- edata %>%
       d_hsSod_cat == ">=135" & d_dcSod_cat == ">=135" ~ 4,
     ),
     levels = 1:4,
-    labels = c("Hypo/Hypo", "Hypo/Normo", "Normo/Hypo", "Normo/Normo")
+    labels = c("Yes/Yes", "Yes/No", "No/Yes", "No/No")
     ),
     d_change_Bp1 = num_dcBp1 - num_dmBp1,
     d_changepercent_Bp1 = (num_dcBp1 - num_dmBp1) / num_dmBp1 * 100,
