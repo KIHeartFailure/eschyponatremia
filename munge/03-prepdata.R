@@ -4,12 +4,12 @@
 edata <- edata %>%
   mutate(
     d_dcEf_cat = factor(case_when(
-      num_dcEf < 40 ~ 1,
+      num_dcEf <= 40 ~ 1,
       num_dcEf <= 49 ~ 2,
       num_dcEf >= 50 ~ 3
     ),
     levels = 1:3,
-    labels = c("<40", "40-49", ">=50")
+    labels = c("<=40", "41-49", ">=50")
     ),
     d_age_cat = factor(case_when(
       num_age < 65 ~ 1,
