@@ -50,7 +50,7 @@ sormod <- summary(pool(ormod))
 nval <- length(sormod$term)
 
 units <- rep(1, nval - 1)
-units[sormod$term[2:nval] %in% c("num_age", "num_dcBp1", "d_dcCKDEPI")] <- 10
+units[sormod$term[2:nval] %in% c("num_age", "d_changepercent_CKDEPI", "d_changepercent_Bp1", "d_changepercent_weight")] <- 10
 units[sormod$term[2:nval] %in% c("num_dmBmi", "num_dcEf")] <- 5
 
 outor <- data.frame(

@@ -1,0 +1,307 @@
+```{r misc, cache=cacheon}
+
+check1 <- fn(wilcox.test(num_hsSod ~ natremia, data = edata %>% filter(natremia %in% c("Yes/Yes", "Yes/No")))$p.value, p = T, dig = 3)
+
+check2 <- fn(wilcox.test(num_dcSod ~ natremia, data = edata %>% filter(natremia %in% c("Yes/Yes", "Yes/No")))$p.value, p = T, dig = 3)
+
+check3ds <- edata %>%
+  filter(natremia %in% c("Yes/Yes", "Yes/No")) %>%
+  group_by(natremia) %>%
+  summarise(
+    med = fn(median(d_change_Sod), dig = 1),
+    q1 = fn(quantile(d_change_Sod, probs = 0.25), dig = 1),
+    q3 = fn(quantile(d_change_Sod, probs = 0.75), dig = 1),
+    mean = fn(mean(d_change_Sod), dig = 1),
+    sd = fn(sd(d_change_Sod), dig = 1)
+  ) %>%
+  mutate(out = paste0(med, " (", q1, "-", q3, ") / ", mean, " (", sd, ")")) %>%
+  ungroup() %>%
+  select(natremia, out)
+
+check3p <- fn(wilcox.test(d_change_Sod ~ natremia, data = edata %>% filter(natremia %in% c("Yes/Yes", "Yes/No")))$p.value, p = T, dig = 3)
+```
+
+1. whether the difference in admission sodium between hyponatremia YES/YES (median admission sodium 131 mmol/L) and hyponatremia YES/NO group (median admission sodium 133) is statistically significant? Answer: p`r check1` (Mann-Whitney U test). 
+
+2. what is the p-value for the difference in discharge sodium between hyponatremia YES/YES (median discharge sodium 132) and hyponatremia YES/NO group (median discharge sodium 138)? Answer: p`r check2` (Mann-Whitney U test). 
+
+3. what was the median/mean change (delta) from admission to discharge in 1) hyponatremia YES/YES and 2) hyponatremia YES/NO group, and what is the p-value for the difference in delta (sodium change) between those two groups? Answer: The change (median (qi-q3) / mean (SD)) from admission to discharge sodium is `r check3ds %>% filter(natremia == "Yes/Yes") %>% pull(out)` (YES/YES) and 
+`r check3ds %>% filter(natremia == "Yes/No") %>% pull(out)` (YES/NO) respectively with a difference of p`r check3p` (Mann-Whitney U test). 
+
+4. in those, who were hyponatremic at admission, can we check if higher admission sodium is a predictor of correction of hyponatremia during hospitalization – in univariate and multivariate logistic regression – for multivariate using the variables from Table S2? Answer (I exchanged variables according to 5 below): 
+
+```{r predsodium, cache=cacheon}
+
+impdata <- miceadds::subset_datlist(imp, expr_subset = edata %>% mutate(koll = d_hsSod_cat == "<135") %>% pull(koll))
+
+ormodcrude <- with(impdata, glm(formula(paste0("d_dcSod_cat == '>=135' ~ num_hsSod")),
+  family = binomial(link = "logit")
+))
+sormodcrude <- summary(pool(ormodcrude))
+
+ormodadj <- with(impdata, glm(formula(paste0("d_dcSod_cat == '>=135' ~ num_hsSod +", paste(predvarsmult, collapse = " + "))),
+  family = binomial(link = "logit")
+))
+sormodadj <- summary(pool(ormodadj))
+
+units <- 10
+
+fixor <- function(mod, varname) {
+  outor <- data.frame(
+    logor = mod$estimate[2],
+    lci = mod$estimate[2] - global_z05 * mod$std.error[2],
+    uci = mod$estimate[2] + global_z05 * mod$std.error[2],
+    p = fn(mod$p.value[2], dig = 3, p = TRUE)
+  ) %>%
+    mutate(orp = paste0(fn(exp(logor)^units, 2), " (", fn(exp(lci)^units, 2), "-", fn(exp(uci)^units, 2), "), ", p)) %>%
+    # remove = Yes
+    mutate(
+      Variable = varname
+    ) %>%
+    select(Variable, orp)
+
+  colnames(outor) <- c("Variable", "Odds Ratio (95% CI)")
+  return(outor)
+}
+
+orc <- fixor(mod = sormodcrude, varname = "Sodium (units of 10) - Crude")
+ora <- fixor(sormodadj, "Sodium (units of 10) - Adjusted")
+
+orboth <- bind_rows(orc, ora)
+
+default_kable(orboth,
+  font_size = 8,
+  caption = "Sodium as a predictor of amelioration of hyponatremia during hospitalization",
+  scale_down = F
+)
+```
+
+5. regarding predictors of correction of hyponatremia during hospitalization (Table S2) – can we please use “% change in systolic blood pressure (per 10% increase)” instead of “systolic blood pressure”, and “improvement in NYHA class (of at least 1 NYHA class) during hospitalization” instead of “NYHA class III/IV at discharge”? Also can we change the interval for “% change in weight” and “% change in eGFR” from “per 1%” to “per 10%”? Answer: Modifications made to Table \ref{tab:preddischarge}. Note that this change will effect all models using imputation since variables in the imputation model have changed. 
+
+\clearpage
+
+6. Could we provide a multivariate analysis of predictors of “de novo” hyponatremia during hospitalization? (i.e. development of hyponatremia [hyponatremia NO/YES] in patients with NO HYPONATREMIA at admission) – Including all parameters from Table S2 (after the above mentioned changes )? Answer:
+
+```{r predhypo, cache=cacheon}
+
+impdata <- miceadds::subset_datlist(imp, expr_subset = edata %>% mutate(koll = d_hsSod_cat == ">=135") %>% pull(koll))
+
+ormod <- with(impdata, glm(formula(paste0("d_dcSod_cat == '<135' ~ ", paste(predvarsmult, collapse = " + "))),
+  family = binomial(link = "logit")
+))
+
+sormod <- summary(pool(ormod))
+nval <- length(sormod$term)
+
+units <- rep(1, nval - 1)
+units[sormod$term[2:nval] %in% c("num_age", "d_changepercent_CKDEPI", "d_changepercent_Bp1", "d_changepercent_weight")] <- 10
+units[sormod$term[2:nval] %in% c("num_dmBmi", "num_dcEf")] <- 5
+
+outor <- data.frame(
+  var = as.character(sormod$term[2:nval]),
+  logor = sormod$estimate[2:nval],
+  lci = sormod$estimate[2:nval] - global_z05 * sormod$std.error[2:nval],
+  uci = sormod$estimate[2:nval] + global_z05 * sormod$std.error[2:nval],
+  p = fn(sormod$p.value[2:nval], dig = 3, p = TRUE)
+) %>%
+  mutate(orp = paste0(fn(exp(logor)^units, 2), " (", fn(exp(lci)^units, 2), "-", fn(exp(uci)^units, 2), "), ", p)) %>%
+  # remove = Yes
+  mutate(
+    Variable = str_replace(var, fixed("Yes"), ""),
+    Variable = paste0(Variable, " (units of ", units, ")"),
+    Variable = str_replace(Variable, fixed(" (units of 1)"), "")
+  ) %>%
+  select(Variable, orp)
+
+colnames(outor) <- c("Variable", "Odds Ratio (95% CI)")
+
+write.xlsx(outor,
+  paste0(
+    "./output/tabs/Predictors of de novo hyponatremia during hospitalization_",
+    Sys.Date(), ".xlsx"
+  ),
+  rowNames = FALSE, overwrite = T
+)
+
+default_kable(outor,
+  font_size = 8,
+  caption = "Predictors of de novo hyponatremia during hospitalization",
+  scale_down = F
+)
+```
+
+\clearpage
+
+7. The Reviewer than states: “Given the above comments, I think that models for corrected hyponatremia or progression to hyponatremia should also use serum sodium as a continuous variable to verify that similar predictors are obtained”.
+Answer: I prepared the same models as in Table \ref{tab:preddischarge} and Table \ref{tab:predhypo} but included sodium at admission. Note that the corrected hyponatremia model is the same as the adjusted model in Table \ref{tab:predsodium}. 
+
+```{r preddischargesodium, cache=cacheon}
+
+impdata <- miceadds::subset_datlist(imp, expr_subset = edata %>% mutate(koll = d_hsSod_cat == "<135") %>% pull(koll))
+
+ormod <- with(impdata, glm(formula(paste0("d_dcSod_cat == '>=135' ~ num_hsSod + ", paste(predvarsmult, collapse = " + "))),
+  family = binomial(link = "logit")
+))
+
+sormod <- summary(pool(ormod))
+nval <- length(sormod$term)
+
+units <- rep(1, nval - 1)
+units[sormod$term[2:nval] %in% c("num_age", "d_changepercent_CKDEPI", "d_changepercent_Bp1", "d_changepercent_weight", "num_hsSod")] <- 10
+units[sormod$term[2:nval] %in% c("num_dmBmi", "num_dcEf")] <- 5
+
+outor <- data.frame(
+  var = as.character(sormod$term[2:nval]),
+  logor = sormod$estimate[2:nval],
+  lci = sormod$estimate[2:nval] - global_z05 * sormod$std.error[2:nval],
+  uci = sormod$estimate[2:nval] + global_z05 * sormod$std.error[2:nval],
+  p = fn(sormod$p.value[2:nval], dig = 3, p = TRUE)
+) %>%
+  mutate(orp = paste0(fn(exp(logor)^units, 2), " (", fn(exp(lci)^units, 2), "-", fn(exp(uci)^units, 2), "), ", p)) %>%
+  # remove = Yes
+  mutate(
+    Variable = str_replace(var, fixed("Yes"), ""),
+    Variable = paste0(Variable, " (units of ", units, ")"),
+    Variable = str_replace(Variable, fixed(" (units of 1)"), "")
+  ) %>%
+  select(Variable, orp)
+
+colnames(outor) <- c("Variable", "Odds Ratio (95% CI)")
+
+write.xlsx(outor,
+  paste0(
+    "./output/tabs/Predictors of amelioration of hyponatremia including sodium_",
+    Sys.Date(), ".xlsx"
+  ),
+  rowNames = FALSE, overwrite = T
+)
+
+default_kable(outor,
+  font_size = 8,
+  caption = "Predictors of amelioration of hyponatremia during hospitalization including sodium",
+  scale_down = F
+)
+```
+
+```{r predhyposodium, cache=cacheon}
+
+impdata <- miceadds::subset_datlist(imp, expr_subset = edata %>% mutate(koll = d_hsSod_cat == ">=135") %>% pull(koll))
+
+ormod <- with(impdata, glm(formula(paste0("d_dcSod_cat == '<135' ~ num_hsSod + ", paste(predvarsmult, collapse = " + "))),
+  family = binomial(link = "logit")
+))
+
+sormod <- summary(pool(ormod))
+nval <- length(sormod$term)
+
+units <- rep(1, nval - 1)
+units[sormod$term[2:nval] %in% c("num_age", "d_changepercent_CKDEPI", "d_changepercent_Bp1", "d_changepercent_weight", "num_hsSod")] <- 10
+units[sormod$term[2:nval] %in% c("num_dmBmi", "num_dcEf")] <- 5
+
+outor <- data.frame(
+  var = as.character(sormod$term[2:nval]),
+  logor = sormod$estimate[2:nval],
+  lci = sormod$estimate[2:nval] - global_z05 * sormod$std.error[2:nval],
+  uci = sormod$estimate[2:nval] + global_z05 * sormod$std.error[2:nval],
+  p = fn(sormod$p.value[2:nval], dig = 3, p = TRUE)
+) %>%
+  mutate(orp = paste0(fn(exp(logor)^units, 2), " (", fn(exp(lci)^units, 2), "-", fn(exp(uci)^units, 2), "), ", p)) %>%
+  # remove = Yes
+  mutate(
+    Variable = str_replace(var, fixed("Yes"), ""),
+    Variable = paste0(Variable, " (units of ", units, ")"),
+    Variable = str_replace(Variable, fixed(" (units of 1)"), "")
+  ) %>%
+  select(Variable, orp)
+
+colnames(outor) <- c("Variable", "Odds Ratio (95% CI)")
+
+write.xlsx(outor,
+  paste0(
+    "./output/tabs/Predictors of de novo hyponatremia during hospitalization including sodium_",
+    Sys.Date(), ".xlsx"
+  ),
+  rowNames = FALSE, overwrite = T
+)
+
+default_kable(outor,
+  font_size = 8,
+  caption = "Predictors of de novo hyponatremia during hospitalization including sodium",
+  scale_down = F
+)
+```
+
+\clearpage
+
+8. Regarding the Cox models for long-term outcomes, can we please include “Daily dose of loop diuretic >40 mg equivalent furosemide dose at discharge” instead of “loop diuretic at discharge, yes vs no” in the analysis? Answer: See tables and figures for cox models. Note that this change will effect all models using imputation since variables in the imputation model have changed. 
+
+9. Could we please provide individual p-values for in-hospital mortality for each hyponatremia group compared with the HYPONATREMIA NO/NO group? Answer: 
+
+```{r inhospdeath4, cache=cacheon}
+
+out <- data.frame(matrix(NA, ncol = 5, nrow = 3))
+colnames(out) <- c("Model", levels(edata$natremia))
+
+event <- "num_dcVital"
+val <- "Dead"
+
+## n (%)
+out[1, 1] <- "n (%)"
+
+ev <- edata %>%
+  filter(!is.na(!!sym(event))) %>%
+  group_by(natremia) %>%
+  count(!!sym(event)) %>%
+  mutate(
+    per = fn(n / sum(n) * 100, 1),
+    np = paste0(n, " (", per, "%)")
+  ) %>%
+  filter(!!sym(event) == val)
+
+out[1, 2:5] <- paste0(
+  ev$np
+)
+
+# log regressions
+
+## crude
+
+out[2, 1] <- "Crude OR (95% CI), p-value"
+
+ormod <- with(imp, glm(formula(paste0(event, "=='", val, "' ~ relevel(natremia, ref = 'No/No')")),
+  family = binomial(link = "logit")
+))
+
+sormod <- summary(pool(ormod))
+
+out[2, 2:5] <- c(paste0(
+  fn(exp(sormod$estimate[2:4]), dig = 2),
+  " (", fn(exp(sormod$estimate[2:4] - global_z05 * sormod$std.error[2:4]), dig = 2),
+  "-", fn(exp(sormod$estimate[2:4] + global_z05 * sormod$std.error[2:4]), dig = 2), "), ",
+  fn(sormod$p.value[2:4], dig = 3, p = TRUE)
+), "ref")
+
+## adjusted individual covariates
+
+out[3, 1] <- "Adjusted OR (95% CI), p-value"
+
+ormod <- with(imp, glm(formula(paste0(event, "=='", val, "' ~ relevel(natremia, ref = 'No/No') + ", paste(logvars, collapse = " + "))),
+  family = binomial(link = "logit")
+))
+
+sormod <- summary(pool(ormod))
+
+out[3, 2:5] <- c(paste0(
+  fn(exp(sormod$estimate[2:4]), dig = 2),
+  " (", fn(exp(sormod$estimate[2:4] - global_z05 * sormod$std.error[2:4]), dig = 2),
+  "-", fn(exp(sormod$estimate[2:4] + global_z05 * sormod$std.error[2:4]), dig = 2), "), ",
+  fn(sormod$p.value[2:4], dig = 3, p = TRUE)
+), "ref")
+
+write.xlsx(out, paste0("./output/tabs/In-hospital death by Natremia_", Sys.Date(), ".xlsx"), rowNames = FALSE, overwrite = T)
+
+default_kable(out,
+  font_size = 6,
+  caption = "In-hospital death by Natremia"
+)
+```

@@ -180,6 +180,14 @@ Performed on all patients and, for the amelioration of hyponatremia, patients wi
 
 \clearpage
 
+## Ad hoc - revision
+
+```{r, child = "./src/for_rev.Rmd"}
+
+```
+
+\clearpage
+
 # Reproducibility
 
 ## R session information {#sessioninfo}

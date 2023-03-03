@@ -405,6 +405,12 @@ edata <- edata %>%
       d_loopDiurddose_eqFurosemide <= 40 ~ 0,
       d_loopDiurddose_eqFurosemide > 40 ~ 1,
     ), levels = 0:1, labels = c("No", "Yes")),
+    d_loopDiurdmod = factor(case_when(
+      d_loopDiurd == "Yes" & d_loopDiurddose_eqFurosemide40 == "No" | d_loopDiurd == "No" ~ 1,
+      d_loopDiurd == "Yes" & d_loopDiurddose_eqFurosemide40 == "Yes" ~ 2
+    ),
+    levels = 1:2, labels = c("No/<=40", ">40")
+    ),
     d_thiazideDiurd = case_when(
       is.na(num_mdDiurd_c2) ~ NA_character_,
       num_mdDiurd_c2 %in% c("Hydrochlorotiazide", "Bendrofluazide", "Chlorthalidone", "Indapamide") |

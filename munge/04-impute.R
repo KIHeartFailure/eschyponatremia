@@ -4,7 +4,7 @@
 
 edataforimp <- edata %>%
   select(patientid, natremia, !!!syms(coxvars), !!!syms(logvars), !!!syms(predvarsmult), starts_with("out"), 
-         d_hsSod_cat, d_dcSod_cat, num_dcVital, d_lengtofstay_cat, d_dcNyha_cat, d_dcIccu_cat, d_change_weight_cat)
+         num_hsSod, d_hsSod_cat, d_dcSod_cat, num_dcVital, d_lengtofstay_cat, d_dcNyha_cat, d_dcIccu_cat, d_change_weight_cat)
 
 noimpvars <- names(edataforimp)[!names(edataforimp) %in% c(coxvars, logvars, predvarsmult)]
 
@@ -55,3 +55,17 @@ imp <-
     )
   }
 stopImplicitCluster()
+
+# check i all impvars have been fully imputed
+
+datacheck <- mice::complete(imp, 1)
+modvarscheck <- names(edataforimp)[!names(edataforimp) %in% noimpvars]
+
+for (i in seq_along(modvarscheck)) {
+  if (any(is.na(datacheck[, modvarscheck[i]]))) stop("Missing for imp vars")
+}
+
+
+#for (i in seq_along(modvars)) {
+#  if (any(is.na(datacheck[, modvarscheck[i]]))) print(modvarscheck[i])
+#}

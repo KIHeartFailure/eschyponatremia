@@ -219,7 +219,7 @@ tab2vars <- c(
   # Pharmacotherapy at hospital discharge
   "num_mdDiurd",
   "d_loopDiurd",
-  "d_loopDiurhmod",
+  "d_loopDiurdmod",
   "d_loopDiurddose_eqFurosemide",
   "d_loopDiurddose_eqFurosemide40",
   "d_thiazideDiurd",
@@ -338,7 +338,7 @@ coxvars <- c(
   "num_dcHb",
 
   # Discharge pharmacotherapy
-  "d_loopDiurd",
+  "d_loopDiurdmod",
   "num_mdALd",
   "d_arb_or_ace_or_arnid",
   "num_mdBBd",
@@ -372,8 +372,8 @@ predvarsmult <- c(
 
   # Clinical and laboratory presentation at discharge
   "d_residual_congestion",
-  "d_dcNyha_cat",
-  "num_dcBp1",
+  "improvment1class_dcNyha",
+  "d_changepercent_Bp1",
   "d_changepercent_CKDEPI",
 
   # Pharmacotherapy during hospitalization
