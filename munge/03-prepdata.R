@@ -56,12 +56,30 @@ edata <- edata %>%
     levels = 1:2,
     labels = c(">=135", "<135")
     ),
+    d_hsSod_cat4 = factor(case_when(
+      num_hsSod < 125 ~ 4,
+      num_hsSod <= 129 ~ 3,
+      num_hsSod < 135 ~ 2,
+      num_hsSod >= 135 ~ 1
+    ),
+    levels = 1:4,
+    labels = c(">=135", "130-134", "125-129", "<125")
+    ),
     d_dcSod_cat = factor(case_when(
       num_dcSod < 135 ~ 2,
       num_dcSod >= 135 ~ 1
     ),
     levels = 1:2,
     labels = c(">=135", "<135")
+    ),
+    d_dcSod_cat4 = factor(case_when(
+      num_dcSod < 125 ~ 4,
+      num_dcSod <= 129 ~ 3,
+      num_dcSod < 135 ~ 2,
+      num_dcSod >= 135 ~ 1
+    ),
+    levels = 1:4,
+    labels = c(">=135", "130-134", "125-129", "<125")
     ),
     natremia = factor(case_when(
       d_hsSod_cat == "<135" & d_dcSod_cat == "<135" ~ 1,
