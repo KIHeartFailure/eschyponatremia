@@ -31,4 +31,4 @@ reports/Statistical_report_XX.Rmd
 
 ## Publication
 
-... 
+https://onlinelibrary.wiley.com/doi/10.1002/ejhf.2873
